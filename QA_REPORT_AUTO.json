@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "javascript": "node --check: todos los archivos pasaron",
+  "sceneAssembly": "entrypoint evaluado con Phaser simulado; no equivale a renderizado real",
+  "worlds": 5,
+  "chapters": 15,
+  "guardians": 5,
+  "resonators": 15,
+  "chapterStories": true,
+  "githubPages": "workflow, permisos y placeholders verificados",
+  "pwa": "manifest, rutas y caché v5 verificados",
+  "mobile": "controles táctiles izquierda/derecha/salto/habilidad/resonancia presentes",
+  "note": "No se ejecutó Phaser real ni se probaron teléfonos físicos."
+}

@@ -1,29 +1,60 @@
-# THE KINGDOM OF LOVE — AURALIA
-## La canción de dos luces · ANDRÉS & VANNESA
+# THE KINGDOM OF LOVE — ANDRÉS & VANNESA
 
-**El repositorio ya está inicializado.** Para cargar el juego completo (código, imágenes, PWA y documentación) falta ejecutar una sola vez el script incluido en el paquete V5.
+## AURALIA: LA CANCIÓN DE DOS LUCES
 
-### Subida inicial del videojuego
-1. Descarga y descomprime [Auralia V5](https://github.com/mixmeltco/the-kingdom-of-love) (paquete entregado en la conversación).
-2. Instala Git for Windows si aún no está instalado: https://git-scm.com/download/win.
-3. Abre PowerShell en la carpeta descomprimida que contiene `index.html`.
-4. Ejecuta:
-   ```powershell
-   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-   .\SUBIR_A_GITHUB.ps1
-   ```
-5. Pulsa Enter para aceptar el repositorio predeterminado `https://github.com/mixmeltco/the-kingdom-of-love.git` y completa la autenticación de GitHub si se solicita.
+Aventura de plataformas 2D inspirada en la era de 16 bits, con identidad propia, exploración, combate y una mecánica de resonancia. Andrés y Vannesa son protagonistas seleccionables y cada uno tiene habilidades distintas.
 
-El script clona el repositorio existente, copia el proyecto completo y hace push a `main`, conservando el historial actual.
+## Concepto narrativo
 
-### Publicación web
-El workflow automático está en `.github/workflows/pages.yml`. **Después de subir el proyecto completo**, abre Settings → Pages → Build and deployment → Source y selecciona **GitHub Actions**. Luego revisa la pestaña Actions.
+En Auralia, cinco regiones se mantenían en armonía gracias a la Campana del Alba. El Afinador del Silencio quebró su cristal en cinco fragmentos. Andrés y Vannesa recorren rutas distintas para recuperar las notas y devolver la música al reino.
 
-Guía detallada: [PUBLICAR_EN_GITHUB_PAGES.md](PUBLICAR_EN_GITHUB_PAGES.md).
+## Mundos
 
-### Concepto del juego
-En Auralia, cinco regiones se mantenían en armonía gracias a la Campana del Alba. El Afinador del Silencio quebró su cristal en cinco fragmentos. ANDRÉS y VANNESA recorren el reino para recuperar las notas y devolver la música.
+1. Valle de las Campanas.
+2. Bosque de las Luciérnagas.
+3. Mar de Vidrio.
+4. Cumbres del Invierno Azul.
+5. Ciudad del Eclipse.
 
-Regiones: Valle de las Campanas · Bosque de las Luciérnagas · Mar de Vidrio · Cumbres del Invierno Azul · Ciudad del Eclipse.
+Cada mundo contiene tres capítulos y un guardián en el tercero.
 
-**Importante:** hasta completar la subida inicial, este repositorio todavía no contiene el juego desplegable. El workflow no publicará el videojuego hasta que `index.html`, `src/` y `assets/` estén cargados.
+## Ejecutar localmente
+
+- Doble clic en `INICIAR_JUEGO.bat`, o
+- Desde PowerShell en la carpeta del proyecto: `python -m http.server 8000`, y abre `http://localhost:8000`.
+
+Se requiere conexión inicial para cargar Phaser 3 desde el CDN. El Service Worker intenta conservar los recursos para visitas posteriores.
+
+## Controles
+
+**Computador:** A/D o flechas para mover; espacio/W/flecha arriba para saltar; Shift para correr; F para la habilidad del personaje; E para activar resonancia cerca de un resonador; Escape para pausar.
+
+**Móvil:** controles táctiles en pantalla: izquierda, derecha, correr, habilidad, resonancia y salto. Se recomienda jugar en horizontal.
+
+## Mecánica de resonancia
+
+Cada capítulo tiene un resonador antiguo. Acércate y pulsa E o el botón ♫. La onda de resonancia revela un puente temporal, aturde enemigos cercanos y puede dañar a un jefe si está dentro del alcance.
+
+## Personalización
+
+Edita `src/config.js` para cambiar nombres, dedicatoria, carta final, recuerdos secretos, antagonista y créditos. Los recuerdos permanecen vacíos por defecto para no inventar detalles de la relación.
+
+## Publicación
+
+El proyecto está preparado para **GitHub Pages con GitHub Actions**. Sigue `PUBLICAR_EN_GITHUB_PAGES.md`. La automatización está en `.github/workflows/pages.yml`.
+
+## Estructura
+
+- `index.html`: entrada web y metadatos sociales.
+- `style.css`: interfaz adaptable y controles táctiles.
+- `src/config.js`: personalización.
+- `src/data.js`: mundos y diseño de quince niveles.
+- `src/art.js`: sprites pixel-art procedurales.
+- `src/game.js`: escenas, física, combate, resonancia y progreso.
+- `src/pwa.js` / `sw.js`: instalación opcional y caché.
+- `assets/worlds/`: arte ambiental original.
+- `.github/workflows/pages.yml`: despliegue automático.
+
+## Estado de calidad
+
+La estructura, los datos y la sintaxis pueden validarse automáticamente con `node tools/validate_project.cjs`. Eso no sustituye una prueba visual completa con Phaser ni pruebas físicas en Android/iPhone. La versión actual representa una evolución jugable y una primera vertical slice de la dirección Auralia; no debe presentarse todavía como lanzamiento comercial final.

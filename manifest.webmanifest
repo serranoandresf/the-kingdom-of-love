@@ -1,0 +1,31 @@
+{
+  "id": "./",
+  "name": "THE KINGDOM OF LOVE — ANDRÉS & VANNESA",
+  "short_name": "Kingdom of Love",
+  "description": "Auralia: la canción de dos luces. Cinco regiones, quince capítulos y dos protagonistas.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#11182b",
+  "theme_color": "#11182b",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
