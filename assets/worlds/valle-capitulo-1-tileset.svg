@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="288" height="192" viewBox="0 0 288 192" shape-rendering="crispEdges">
+  <title>Valle de las Campanas — tileset del capítulo 1</title>
+  <defs>
+    <linearGradient id="soil" x2="0" y2="1"><stop stop-color="#9b704b"/><stop offset="1" stop-color="#684735"/></linearGradient>
+    <linearGradient id="stone" x2="0" y2="1"><stop stop-color="#f1d39a"/><stop offset=".18" stop-color="#bd9b68"/><stop offset="1" stop-color="#80664c"/></linearGradient>
+    <radialGradient id="bell"><stop stop-color="#fff5b8"/><stop offset=".35" stop-color="#ffdc72"/><stop offset="1" stop-color="#c78a3e"/></radialGradient>
+  </defs>
+  <!-- 0: seamless turf and earth -->
+  <g transform="translate(0 0)"><rect width="48" height="48" fill="url(#soil)"/><path fill="#416f4d" d="M0 8h48v8H0z"/><path fill="#78ad67" d="M0 4h48v5H0z"/><path fill="#acd17c" d="M2 3h8v2H2zm14 1h11v2H16zm19-2h9v3h-9z"/><path fill="#b3d57e" d="M8 9h2v5H8zm20-1h3v7h-3zm15 0h2v4h-2z"/><path fill="#805638" d="M3 22h12v3H3zm21 9h10v2H24zm-8 12h6v2h-6z"/><path fill="#b48452" d="M30 20h7v2h-7zM5 35h5v2H5zm31 8h9v2h-9z"/></g>
+  <!-- 1: continuous carved platform -->
+  <g transform="translate(48 0)"><rect x="1" y="9" width="46" height="37" rx="4" fill="#614934"/><rect x="0" y="6" width="48" height="35" rx="4" fill="url(#stone)"/><path fill="#416f4d" d="M0 8h48v6H0z"/><path fill="#91bd71" d="M0 5h48v5H0z"/><path fill="#d8bf8c" d="M4 17h17v3H4zm25 2h14v3H29zM8 31h11v2H8z"/><path fill="#8a6c4c" d="M24 13h2v9h-2zm-8 17h2v7h-2zM37 28h2v10h-2z"/><path fill="#e4d1a1" d="M2 10h8v2H2zm29 0h12v2H31z"/></g>
+  <!-- 2: left cap -->
+  <g transform="translate(96 0)"><path fill="#614934" d="M14 11h33v35H14z"/><path fill="url(#stone)" d="M10 7h38v35H10z"/><path fill="#416f4d" d="M8 8h40v7H8z"/><path fill="#9ac47a" d="M8 5h39v5H8z"/><path fill="#d9c38e" d="M20 20h18v3H20zm2 14h13v2H22z"/><path fill="#8b6c4b" d="M29 14h2v10h-2z"/></g>
+  <!-- 3: right cap -->
+  <g transform="translate(144 0)"><path fill="#614934" d="M1 11h33v35H1z"/><path fill="url(#stone)" d="M0 7h38v35H0z"/><path fill="#416f4d" d="M0 8h40v7H0z"/><path fill="#9ac47a" d="M0 5h39v5H0z"/><path fill="#d9c38e" d="M4 20h18v3H4zm8 14h13v2H12z"/><path fill="#8b6c4b" d="M25 14h2v10h-2z"/></g>
+  <!-- 4: weathered rock -->
+  <g transform="translate(192 0)"><path fill="#807761" d="M4 13h8V8h8V5h14v5h8v7h4v25H2V19h2z"/><path fill="#b5a989" d="M12 10h8V7h12v5h8v7h5v4H8v-6h4z"/><path fill="#625d50" d="M5 27h13v3H5zm24 7h13v3H29z"/><path fill="#d6c69f" d="M16 14h3v5h-3zm16-1h3v4h-3z"/><path fill="#9b8c6b" d="M9 37h9v2H9z"/></g>
+  <!-- 5: clover tuft -->
+  <g transform="translate(240 0)"><path fill="#31553d" d="M22 47h4V27h-4z"/><path fill="#4e8b55" d="M23 29C4 27 6 13 16 14c1-12 17-11 17 0 11-3 17 12 0 15z"/><path fill="#82bc68" d="M14 19c-3-7 5-9 8-4 2-8 12-6 10 1 8-2 10 7 1 10H17z"/><path fill="#b4d783" d="M17 18h3v2h-3zm10-3h3v3h-3zm5 8h3v2h-3z"/></g>
+  <!-- 6: blue bell flowers -->
+  <g transform="translate(0 48)"><path stroke="#427b4b" stroke-width="2" d="M15 48V26m17 22V20m9 28V31"/><path fill="#77b967" d="M15 39l-7-6 2-2 7 5zm17-7 7-7 2 2-8 8zM40 40l-7-4 1-2 8 3z"/><path fill="#7da8d9" d="M10 26q5-5 10 0l-2 8h-6zm4-4q1-5 3 0m10-4q5-5 10 0l-2 8h-6zm4-4q1-5 3 0m4 11q4-4 8 0l-2 7h-5z"/><path fill="#f7d98a" d="M14 28h3v2h-3zm12-10h3v2h-3zm7 12h3v2h-3z"/></g>
+  <!-- 7: golden campanillas -->
+  <g transform="translate(48 48)"><path stroke="#487c48" stroke-width="2" d="M10 48V23m15 25V18m14 30V26"/><path fill="#73a95b" d="M10 37l-6-5 2-2 6 5zm15-8 6-8 2 2-7 9zm14 11-7-5 2-2 7 4z"/><path fill="#d99e46" d="M6 22h8v3l-2 7H8l-2-7zm15-5h8v3l-2 7h-4l-2-7zm14 8h8v3l-2 7h-4l-2-7z"/><path fill="#ffe5a0" d="M8 23h3v2H8zm15-5h3v2h-3zm14 8h3v2h-3z"/></g>
+  <!-- 8: meadow stones -->
+  <g transform="translate(96 48)"><ellipse cx="24" cy="39" rx="21" ry="6" fill="#55493e" opacity=".45"/><path fill="#a99c7e" d="M4 32l5-11 10-4 8 4 2 10-6 8H9z"/><path fill="#c8bc98" d="M9 23l8-4 7 4 2 7-8 1-9-3z"/><path fill="#81775f" d="M28 34l4-10 8-3 6 5-2 10-8 4z"/><path fill="#c3b48d" d="M34 27l6-3 3 4-2 5-8 1z"/></g>
+  <!-- 9: rope bridge plank -->
+  <g transform="translate(144 48)"><path stroke="#5b4334" stroke-width="3" d="M4 5v38M44 5v38"/><path stroke="#d1ad70" stroke-width="2" d="M4 9h40M4 42h40"/><path fill="#9b704b" d="M6 16h36v21H6z"/><path fill="#c08f59" d="M7 17h8v18H7zm12 0h8v18h-8zm12 0h8v18h-8z"/><path stroke="#714b35" stroke-width="1" d="M16 17v18m12-18v18m12-18v18"/><circle cx="11" cy="20" r="1" fill="#f4d59a"/><circle cx="23" cy="32" r="1" fill="#f4d59a"/><circle cx="35" cy="20" r="1" fill="#f4d59a"/></g>
+  <!-- 10: mossy bell marker -->
+  <g transform="translate(192 48)"><path fill="#5d493d" d="M7 45h34v3H7zM12 43V13h4v30zm20 0V13h4v30z"/><path fill="#88735c" d="M9 14h30v4H9zM6 9h36v5H6z"/><path fill="#6ca363" d="M5 10h9v4H5zm27-2h11v5H32z"/><path fill="#e0b75b" d="M22 18h5v5l5 7v9H16v-9l6-7z"/><path fill="#fff0ab" d="M23 25h3v9h-3z"/><path fill="#704d35" d="M14 38h21v3H14z"/></g>
+  <!-- 11: carved stone step -->
+  <g transform="translate(240 48)"><path fill="#655445" d="M0 16h48v27H0z"/><path fill="#c9ad7b" d="M0 11h48v8H0z"/><path fill="#e4d0a2" d="M3 12h15v3H3zm27 0h15v3H30z"/><path fill="#8f7658" d="M5 24h14v3H5zm24 10h15v3H29z"/><path fill="#b5a078" d="M22 20h3v8h-3zm-9 15h3v5h-3z"/></g>
+  <!-- 12: little leafy shrub -->
+  <g transform="translate(0 96)"><path fill="#31553e" d="M3 42h43v5H3z"/><circle cx="13" cy="32" r="10" fill="#4c8150"/><circle cx="23" cy="25" r="13" fill="#5b9955"/><circle cx="35" cy="32" r="11" fill="#40794a"/><path fill="#8abf64" d="M14 20q5-5 8 0h-5zm12-5q5-5 8 0h-5zm7 14q4-4 7 0h-5z"/><path fill="#d9c17c" d="M8 37h5v2H8z"/></g>
+  <!-- 13: tall reed and seed head -->
+  <g transform="translate(48 96)"><path stroke="#477a48" stroke-width="2" d="M13 48q-2-18 2-33m8 33q6-22 3-37m8 37q-2-17 5-27"/><path fill="#76a85a" d="M14 28l-9-6 2-2 9 6zm11-8l-7-9 2-2 8 10zm9 9 8-8 2 2-9 9z"/><ellipse cx="15" cy="11" rx="3" ry="6" fill="#dfc27b"/><ellipse cx="26" cy="8" rx="3" ry="6" fill="#efcf83"/><ellipse cx="39" cy="20" rx="3" ry="6" fill="#d8b870"/><path fill="#fff1bd" d="M14 7h2v3h-2zm11-3h2v3h-2z"/></g>
+  <!-- 14: glowing firefly jar -->
+  <g transform="translate(96 96)"><path fill="#4b4239" d="M19 5h10v4H19zM16 10h16v3H16z"/><rect x="13" y="13" width="22" height="27" rx="5" fill="#a57345"/><rect x="16" y="16" width="16" height="20" rx="3" fill="#f7d780"/><path fill="#fff4bd" d="M21 17h4v15h-4z"/><path fill="#fff" opacity=".7" d="M8 19h4v2H8zm27-7h5v2h-5zM9 32h4v2H9z"/><path fill="#7b5639" d="M10 40h28v4H10z"/><path fill="#9bca79" d="M21 28h3v3h-3zm7-5h2v2h-2z"/></g>
+  <!-- 15: bluebell cluster -->
+  <g transform="translate(144 96)"><path stroke="#487a48" stroke-width="2" d="M12 47V27m12 20V19m12 28V25"/><path fill="#548a4f" d="M12 37l-7-5 2-2 7 5zm12-12 6-7 2 2-7 8zm12 12-7-4 1-2 7 3z"/><path fill="#839bd4" d="M7 24h10l-2 9h-6zm12-8h10l-2 9h-6zm12 8h10l-2 9h-6z"/><path fill="#d9e5ff" d="M9 25h3v2H9zm12-8h3v2h-3zm12 8h3v2h-3z"/><circle cx="12" cy="30" r="1" fill="#ffdc83"/><circle cx="24" cy="22" r="1" fill="#ffdc83"/><circle cx="36" cy="30" r="1" fill="#ffdc83"/></g>
+  <!-- 16: cracked earth variation -->
+  <g transform="translate(192 96)"><rect width="48" height="48" fill="#775139"/><path fill="#416f4d" d="M0 5h48v8H0z"/><path fill="#8ab76a" d="M0 3h48v4H0z"/><path fill="#b3d57e" d="M8 2h10v3H8zm24 0h8v3h-8z"/><path stroke="#493a36" stroke-width="2" d="M13 16l5 6-4 7 6 6m12-19-4 7 5 6-3 8M7 40l7-3m20 5 8-5"/><path fill="#ae8151" d="M3 18h6v2H3zm31 9h8v2h-8z"/></g>
+  <!-- 17: floating bell sparkle -->
+  <g transform="translate(240 96)"><path fill="#fff1ad" d="M24 2l4 13 13 4-13 4-4 14-4-14-13-4 13-4z"/><path fill="#f2bf57" d="M24 11l2 7 7 1-7 3-2 8-3-8-7-3 7-1z"/><circle cx="24" cy="20" r="3" fill="#fffdf0"/><path stroke="#edc76d" stroke-width="2" d="M9 41h30"/><path fill="#78a46b" d="M15 38h18v4H15z"/></g>
+  <!-- 18: bellflower close-up -->
+  <g transform="translate(0 144)"><path stroke="#41764a" stroke-width="3" d="M24 48V20"/><path fill="#67a65b" d="M23 36l-9-7 2-3 9 6z"/><path fill="#dba447" d="M16 13h16v5l-3 10h-10l-3-10z"/><path fill="#ffdf83" d="M19 14h4v3h-4z"/><path fill="#6e92c4" d="M20 26h8l-2 4h-4z"/><path fill="#f4d27f" d="M14 46h20v2H14z"/></g>
+  <!-- 19: footpath stone -->
+  <g transform="translate(48 144)"><path fill="#776955" d="M4 29l6-11 13-4 9 7 7 11-7 8H11z"/><path fill="#c6b48b" d="M11 22l9-5 9 3 4 9H8z"/><path fill="#ded0a8" d="M14 21h7v2h-7zm12 4h5v2h-5z"/><path fill="#8f8164" d="M8 33h13v3H8zm18 4h9v2h-9z"/></g>
+  <!-- 20: chapter landmark, bell tower -->
+  <g transform="translate(96 144)"><path fill="#5a5144" d="M8 47V20h5V14h5V8h12v6h5v6h5v27z"/><path fill="#a59069" d="M13 46V22h5V16h5V10h6v6h5v6h5v24z"/><path fill="#d7bd7d" d="M11 19h26v3H11zM17 14h16v3H17zM22 8h6v5h-6z"/><path fill="#655340" d="M21 24h10v15H21z"/><path fill="#f3d16f" d="M23 25h6v9h-6z"/><path fill="#fff0a5" d="M25 27h2v6h-2z"/><path fill="#d2bd8b" d="M5 47h38v2H5z"/><path fill="#89b66b" d="M7 46h8v2H7zm25 0h10v2H32z"/></g>
+  <!-- 21: arched bell gate -->
+  <g transform="translate(144 144)"><path fill="#5b493b" d="M5 48V15h8V8h6V4h10v4h6v7h8v33z"/><path fill="#b39a70" d="M10 48V17h7V10h6V6h6v4h6v7h7v31z"/><path fill="#6c604b" d="M18 48V30a6 6 0 0 1 18 0v18z"/><path fill="#e8c56c" d="M23 20h8v3h-8zM25 23h4v8h-4z"/><path fill="#82ad69" d="M5 46h10v2H5zm28 0h10v2H33z"/><path fill="#ddc58e" d="M12 13h6v2h-6zm18-5h4v3h-4z"/></g>
+  <!-- 22: tall grass silhouette -->
+  <g transform="translate(192 144)"><path fill="#31543d" d="M3 46h42v2H3z"/><path stroke="#477c4c" stroke-width="3" d="M20 47Q7 28 6 10m13 37Q17 21 22 4m0 43Q31 26 39 11m-17 36Q39 33 45 27"/><path fill="#79ad5d" d="M5 9l7 7-5 1zm16-7 5 11-5-1zm18 8-5 9 1-6zM43 25l3 10-5-3z"/><path fill="#a8cb74" d="M7 12l3 4-3-1zm14-6 2 5-2-1z"/></g>
+  <!-- 23: resonant bell relic -->
+  <g transform="translate(240 144)"><path fill="#6a4934" d="M22 2h4v7h-4zM16 8h16v4H16z"/><path fill="#b47c38" d="M16 12h16l4 18-4 7H16l-4-7z"/><path fill="#f0c66b" d="M18 14h12l3 14-3 5H18l-3-5z"/><path fill="#fff0ac" d="M22 16h4v15h-4z"/><path fill="#8a5a34" d="M11 30h26v5H11zM21 35h6v7h-6z"/><circle cx="24" cy="44" r="3" fill="#ffe99a"/><path fill="#fff7cf" opacity=".7" d="M7 18h4v2H7zm30-6h5v2h-5zM5 34h5v2H5z"/></g>
+</svg>

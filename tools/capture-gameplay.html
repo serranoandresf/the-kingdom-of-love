@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Capturas QA · Auralia</title>
+<style>
+  body{margin:0;padding:1rem;background:#11182b;color:#f8edcf;font:15px system-ui}
+  nav{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem}
+  button{padding:.65rem .9rem;border:1px solid #f1c76c;border-radius:7px;background:#264976;color:white;font-weight:700}
+  button:disabled{opacity:.45;cursor:wait}
+  iframe{display:block;width:min(960px,100%);height:min(540px,56vw);min-height:300px;border:0;background:#090e1c}
+  pre{white-space:pre-wrap}
+</style>
+<nav>
+  <button data-role="ANDRES" disabled>Abrir capítulo con Andrés</button>
+  <button data-role="VANNESA" disabled>Abrir capítulo con VANNESA</button>
+  <label for="evidence-state">Evidencia:</label><select id="evidence-state"><option value="initial">Inicio</option><option value="combat">Combate</option><option value="resonance">Resonancia</option><option value="checkpoint">Checkpoint</option><option value="complete">Finalización</option></select>
+  <button id="capture" disabled>Guardar evidencia del gameplay</button>
+  <button data-zoom="1" disabled>Comparar cámara 1.00×</button>
+  <button data-zoom="1.15" disabled>Comparar cámara 1.15×</button>
+</nav>
+<iframe id="game" title="Vista de juego Auralia" src="/index.html?qa-capture"></iframe>
+<pre id="status">El juego se está cargando.</pre>
+<pre id="actor-state">Estado del personaje: esperando al juego.</pre>
+<pre id="level-state">Estado del capítulo: esperando al juego.</pre>
+<pre id="asset-state">Recursos QA: esperando al juego.</pre>
+<script>
+"use strict";
+const frame=document.querySelector("#game"),status=document.querySelector("#status"),actorState=document.querySelector("#actor-state");
+const assetState=document.querySelector("#asset-state"),levelState=document.querySelector("#level-state");
+let selectedRole="ANDRES";
+frame.addEventListener("load",()=>{status.textContent="Juego cargado. Selecciona un protagonista para iniciar el capítulo."});
+setInterval(()=>{try{
+  const qa=frame.contentWindow.LOVE_GAME_QA;
+  if(!qa){return}
+  const assets=qa.inspectAssets(),actor=qa.inspectPlayer(),level=qa.inspectLevel();
+  const ready=assets.renderer==="WebGL"&&assets.tilesetLoaded&&assets.andresSheetLoaded&&assets.vannesaSheetLoaded&&assets.chapterMusicLoaded;
+  document.querySelectorAll("[data-role]").forEach(button=>button.disabled=!ready);
+  document.querySelectorAll("[data-zoom]").forEach(button=>button.disabled=!actor.role||!actor.animation);
+  const finalReady=level.scenes?.some(name=>name==="Intermission"||name==="Finale");
+  document.querySelector("#capture").disabled=document.querySelector("#evidence-state").value==="complete"?!finalReady:!(actor.role&&actor.animation&&actor.playing);
+  actorState.textContent=JSON.stringify(actor,null,2);levelState.textContent=JSON.stringify(level,null,2);assetState.textContent=JSON.stringify(assets,null,2);
+}catch(_){}},120);
+function snapshotPng(game){return new Promise((resolve,reject)=>{try{game.renderer.snapshot(image=>{try{const canvas=document.createElement("canvas");canvas.width=960;canvas.height=540;canvas.getContext("2d").drawImage(image,0,0,960,540);const png=canvas.toDataURL("image/png");if(png.length<4000)throw new Error("La captura del renderer está vacía");resolve(png)}catch(error){reject(error)}},"image/png")}catch(error){reject(error)}})}
+document.querySelectorAll("[data-role]").forEach(button=>button.addEventListener("click",()=>{
+  try{
+    selectedRole=button.dataset.role;
+    frame.contentWindow.LOVE_GAME_QA.startChapter(selectedRole);
+    status.textContent="Capítulo 1 iniciado con "+selectedRole+". Espera a que pinte el primer cuadro y guarda la captura.";
+  }catch(error){status.textContent="No se pudo iniciar el capítulo: "+error.message}
+}));
+document.querySelector("#capture").addEventListener("click",async()=>{
+  try{
+    const qa=frame.contentWindow.LOVE_GAME_QA,game=qa.game,label=document.querySelector("#evidence-state").value,deadline=Date.now()+(label==="complete"?8000:3000);
+    let actor=qa.inspectPlayer();
+    if(label==="complete"){
+      while(!actor.scenes?.some(name=>name==="Intermission"||name==="Finale")&&Date.now()<deadline){await new Promise(resolve=>setTimeout(resolve,60));actor=qa.inspectPlayer()}
+      if(!actor.scenes?.some(name=>name==="Intermission"||name==="Finale"))throw new Error("El capítulo no alcanzó Intermission/Finale dentro de 8 s");
+    }else{
+      while(!(actor.role&&actor.animation&&actor.playing)&&Date.now()<deadline){await new Promise(resolve=>setTimeout(resolve,50));actor=qa.inspectPlayer()}
+      if(!actor.role||!actor.animation||!actor.playing)throw new Error("Phaser no llegó a una animación estable dentro de 3 s");
+    }
+    await new Promise(resolve=>frame.contentWindow.requestAnimationFrame(()=>frame.contentWindow.requestAnimationFrame(resolve)));
+    const dataUrl=await snapshotPng(game);
+    const role=(actor.role||actor.savedProgress?.role||selectedRole).toLowerCase();
+    const key=`acceptance-${role}-${label}`;
+    const response=await fetch(`/capture/${key}`,{method:"POST",headers:{"content-type":"text/plain"},body:dataUrl});
+    if(!response.ok)throw new Error(await response.text());
+    status.textContent=JSON.stringify(await response.json(),null,2);
+  }catch(error){status.textContent="Error: "+error.message}
+});
+document.querySelectorAll("[data-zoom]").forEach(button=>button.addEventListener("click",async()=>{
+  try{const qa=frame.contentWindow.LOVE_GAME_QA,zoom=Number(button.dataset.zoom);if(!qa?.setCameraZoom(zoom))throw new Error("Inicia un capítulo antes de comparar");await new Promise(resolve=>setTimeout(resolve,180));const png=await snapshotPng(qa.game),key=zoom===1?"composition-zoom-100":"composition-zoom-115";const response=await fetch(`/capture/${key}`,{method:"POST",headers:{"content-type":"text/plain"},body:png});if(!response.ok)throw new Error(await response.text());status.textContent=JSON.stringify(await response.json(),null,2)}catch(error){status.textContent="Error: "+error.message}
+}));
+</script>
+</html>

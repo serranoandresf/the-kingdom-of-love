@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auralia · Preparación de hojas de personajes</title>
+<style>
+  body{max-width:760px;margin:3rem auto;padding:0 1.25rem;background:#11182b;color:#f8edcf;font:16px/1.5 system-ui}
+  button{padding:.8rem 1.2rem;border:1px solid #f1c76c;border-radius:8px;background:#264976;color:white;font-weight:700;cursor:pointer}
+  pre{white-space:pre-wrap;color:#d9e5f8} canvas{width:min(100%,512px);height:auto;image-rendering:pixelated;border:1px solid #716c80}
+</style>
+<h1>Preparar spritesheets de Auralia</h1>
+<p>Recorta las referencias originales en una cuadrícula 4×3. El fondo negro de VANNESA se hace transparente por conectividad desde los bordes. Los dibujos de los personajes no se alteran.</p>
+<button id="export">Preparar y guardar ambas hojas</button>
+<pre id="status">Listo. El exportador sólo escribe en assets/characters/.</pre>
+<div id="preview"></div>
+<script>
+"use strict";
+const status=document.querySelector("#status"),preview=document.querySelector("#preview");
+function loadImage(url){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=url})}
+function cutSheet(image,removeBlack){
+  const width=1024,height=684,frameWidth=256,frameHeight=228,canvas=document.createElement("canvas");
+  canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.imageSmoothingEnabled=true;
+  for(let row=0;row<3;row++)for(let col=0;col<4;col++){
+    const sy=row*image.naturalHeight/3,sh=image.naturalHeight/3;
+    ctx.drawImage(image,col*image.naturalWidth/4,sy,image.naturalWidth/4,sh,col*frameWidth,row*frameHeight,frameWidth,frameHeight);
+  }
+  if(removeBlack){
+    const data=ctx.getImageData(0,0,width,height),pixels=data.data,total=width*height,seen=new Uint8Array(total),queue=new Int32Array(total);let head=0,tail=0;
+    const isMatte=i=>{const p=i*4,r=pixels[p],g=pixels[p+1],b=pixels[p+2];return Math.max(r,g,b)<54&&Math.max(r,g,b)-Math.min(r,g,b)<25};
+    const seed=i=>{if(!seen[i]&&isMatte(i)){seen[i]=1;queue[tail++]=i}};
+    for(let x=0;x<width;x++){seed(x);seed((height-1)*width+x)}for(let y=1;y<height-1;y++){seed(y*width);seed(y*width+width-1)}
+    while(head<tail){const i=queue[head++],x=i%width,y=(i/width)|0;if(x)seed(i-1);if(x<width-1)seed(i+1);if(y)seed(i-width);if(y<height-1)seed(i+width)}
+    for(let i=0;i<total;i++)if(seen[i])pixels[i*4+3]=0;
+    ctx.putImageData(data,0,0);
+  }
+  return canvas;
+}
+async function upload(key,canvas){const response=await fetch("/export/"+key,{method:"POST",headers:{"content-type":"text/plain"},body:canvas.toDataURL("image/png")});if(!response.ok)throw new Error(key+": "+await response.text());return response.json()}
+document.querySelector("#export").addEventListener("click",async()=>{
+  const button=document.querySelector("#export");button.disabled=true;status.textContent="Procesando las dos referencias originales…";
+  try{
+    const [andresRef,vannesaRef]=await Promise.all([loadImage("/assets/characters/andres-animation-reference.webp"),loadImage("/assets/characters/vannesa-animation-reference.webp")]);
+    const andres=cutSheet(andresRef,false),vannesa=cutSheet(vannesaRef,true);
+    preview.replaceChildren(andres,vannesa);const results=await Promise.all([upload("andres",andres),upload("vannesa",vannesa)]);
+    status.textContent=JSON.stringify({frameGrid:"4 × 3",frameSize:"256 × 228 px",results},null,2);
+  }catch(error){status.textContent="Error: "+error.message}
+  finally{button.disabled=false}
+});
+</script>
+</html>

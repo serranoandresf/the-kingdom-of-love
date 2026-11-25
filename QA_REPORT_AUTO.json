@@ -8,7 +8,7 @@
   "resonators": 15,
   "chapterStories": true,
   "githubPages": "workflow, permisos y placeholders verificados",
-  "pwa": "manifest, rutas y caché v5 verificados",
-  "mobile": "controles táctiles izquierda/derecha/salto/habilidad/resonancia presentes",
-  "note": "No se ejecutó Phaser real ni se probaron teléfonos físicos."
+  "pwa": "manifest, assets y caché versionada 2026-11-24-9",
+  "mobile": "controles táctiles presentes; viewport emulado no aplicó, teléfono físico pendiente",
+  "note": "El reporte automático cubre análisis estático. Phaser/WebGL, marcadores de acción y guardado se probaron en navegador real y constan en REGISTRO_PRUEBAS_AURALIA.md; no se verificó teléfono físico."
 }

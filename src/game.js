@@ -11,7 +11,7 @@
   const readSave=()=>{try{const raw=safeGet("kol_save_v2","");if(raw){const v=JSON.parse(raw);if(v&&typeof v==="object")return v}}catch(_){}return null};
   const getProgress=()=>{const v=readSave();return {level:Math.max(0,Math.min(TOTAL-1,Number(v?.level??safeGet("kol_level","0"))||0)),role:v?.role||safeGet("kol_role","ANDRES"),score:Number(v?.score??safeGet("kol_score","0"))||0,coins:Number(v?.coins)||0,hearts:Number(v?.hearts)||0,fragments:Number(v?.fragments)||0,lives:Math.max(1,Math.min(3,Number(v?.lives)||3))}};
   const saveProgress=(data={})=>{const old=readSave()||{};const next={version:2,level:data.level??old.level??0,role:data.role??old.role??safeGet("kol_role","ANDRES"),score:data.score??old.score??0,coins:data.coins??old.coins??0,hearts:data.hearts??old.hearts??0,fragments:data.fragments??old.fragments??0,lives:data.lives??old.lives??3,checkpoint:data.checkpoint??old.checkpoint??100,bestScore:Math.max(Number(old.bestScore)||0,Number(data.bestScore)||0,Number(data.score)||0),music:safeGet("kol_music","1"),sfx:safeGet("kol_sfx","1"),updatedAt:new Date().toISOString()};safeSet("kol_save_v2",JSON.stringify(next));safeSet("kol_level",next.level);safeSet("kol_role",next.role);safeSet("kol_score",next.score);return next};
-  const audio={ctx:null,music:safeGet("kol_music","1")==="1",sfx:safeGet("kol_sfx","1")==="1",musicVolume:Math.max(0,Math.min(1,Number(safeGet("kol_music_volume","0.65"))||0)),sfxVolume:Math.max(0,Math.min(1,Number(safeGet("kol_sfx_volume","0.8"))||0))};
+  const audio={ctx:null,track:null,trackKey:"",worldIndex:0,music:safeGet("kol_music","1")==="1",sfx:safeGet("kol_sfx","1")==="1",musicVolume:Math.max(0,Math.min(1,Number(safeGet("kol_music_volume","0.65"))||0)),sfxVolume:Math.max(0,Math.min(1,Number(safeGet("kol_sfx_volume","0.8"))||0))};
   function playTone(freq=440,duration=.08,type="square",volume=.035,channel="sfx"){
     if(channel==="music"?!audio.music:!audio.sfx)return;
     try{
@@ -23,10 +23,15 @@
     }catch(_){}
   }
   function startMusic(scene,worldIndex){
-    audio.music=safeGet("kol_music","1")==="1";if(!audio.music)return;
-    const melodies=[[392,494,587,494,440,523,659,523],[330,392,494,392,349,440,523,440],[392,440,523,659,587,523,440,392],[294,370,440,370,262,330,392,330],[440,523,659,784,659,587,523,440]];
-    const seq=melodies[worldIndex%melodies.length];let n=0;
-    scene.time.addEvent({delay:340,loop:true,callback:()=>{if(audio.music){playTone(seq[n%seq.length],.19,"triangle",.018,"music");n++}}});
+    audio.music=safeGet("kol_music","1")==="1";
+    audio.worldIndex=Math.max(0,Math.min(4,Number(worldIndex)||0));
+    if(!audio.music){if(audio.track&&audio.track.isPlaying)audio.track.stop();return}
+    const key="auralia_world_"+audio.worldIndex;
+    if(!scene||!scene.sound||!scene.cache||!scene.cache.audio||!scene.cache.audio.exists(key)){console.warn("Auralia: falta la pista de música",key);return}
+    if(audio.track&&audio.trackKey===key){audio.track.setVolume(audio.musicVolume);if(!audio.track.isPlaying){if(scene.sound.locked){const same=audio.track;scene.sound.once("unlocked",()=>{if(audio.music&&audio.track===same&&!same.isPlaying)same.play()})}else audio.track.play()}return}
+    if(audio.track){try{audio.track.stop();audio.track.destroy()}catch(_){}}
+    const track=scene.sound.add(key,{loop:true,volume:audio.musicVolume});audio.track=track;audio.trackKey=key;
+    if(scene.sound.locked){scene.sound.once("unlocked",()=>{if(audio.music&&audio.track===track&&!track.isPlaying)track.play()})}else track.play();
   }
   function button(scene,x,y,label,callback,opts={}){
     const width=opts.width||240,height=opts.height||48;
@@ -71,7 +76,7 @@
 
   class Boot extends Phaser.Scene{
     constructor(){super("Boot")}
-    preload(){this.load.image("titleCover","assets/concept/title-screen-concept.webp");this.load.image("valleyPanorama","assets/worlds/valle-de-las-campanas.webp")}
+    preload(){this.load.image("titleCover","assets/concept/title-screen-concept.webp");this.load.image("valleyPanorama","assets/worlds/valle-de-las-campanas.webp");this.load.image("valleyIntroRemaster","assets/worlds/valle-intro-remaster.webp");this.load.spritesheet("valleyProductionTiles","assets/worlds/valle-capitulo-1-tileset.svg",{frameWidth:48,frameHeight:48});this.load.spritesheet("andresGameplaySheet","assets/characters/andres-gameplay-sheet.png",{frameWidth:256,frameHeight:228});this.load.spritesheet("vannesaGameplaySheet","assets/characters/vannesa-gameplay-sheet.png",{frameWidth:256,frameHeight:228});this.load.image("andresPortrait","assets/characters/andres-portrait.webp");this.load.image("vannesaPortrait","assets/characters/vannesa-portrait.webp");for(let i=0;i<5;i++)this.load.audio("auralia_world_"+i,"assets/audio/auralia-world-"+i+".mp3")}
     create(){window.LOVE_GAME_ART.create(this);this.scene.start("Title")}
   }
   class Title extends Phaser.Scene{
@@ -85,17 +90,24 @@
         this.add.text(W/2,115,CFG.subtitle||"ANDRÉS & VANNESA",{fontFamily:"Georgia,serif",fontSize:"22px",fontStyle:"bold",color:"#ffdb83"}).setOrigin(.5);
       }
       const progress=getProgress();
-      const actions=[
-        {x:810,y:314,w:270,h:44,run:()=>this.scene.start("Select",{level:0,score:0,lives:3})},
-        {x:810,y:359,w:260,h:40,run:()=>this.scene.start("Select",{level:progress.level,score:progress.score,lives:progress.lives,coins:progress.coins,hearts:progress.hearts,fragments:progress.fragments,continue:true})},
-        {x:810,y:395,w:270,h:40,run:()=>this.scene.start("Select",{level:progress.level,score:progress.score,lives:progress.lives,coins:progress.coins,hearts:progress.hearts,fragments:progress.fragments,continue:true})},
-        {x:810,y:431,w:260,h:40,run:()=>this.scene.start("Options")},
-        {x:810,y:471,w:260,h:40,run:()=>this.scene.start("Credits")}
-      ];
-      actions.forEach(a=>{const hit=this.add.rectangle(a.x,a.y,a.w,a.h,0xffffff,0).setDepth(5).setInteractive({useHandCursor:true});hit.on("pointerover",()=>hit.setFillStyle(0xffffff,.10));hit.on("pointerout",()=>hit.setFillStyle(0xffffff,0));hit.on("pointerdown",a.run)});
       const newGame=()=>this.scene.start("Select",{level:0,score:0,lives:3});
+      const continueGame=()=>this.scene.start("Select",{level:progress.level,score:progress.score,lives:progress.lives,coins:progress.coins,hearts:progress.hearts,fragments:progress.fragments,continue:true});
+      const menuItems=[
+        {x:730,y:254,w:230,h:47,run:newGame},
+        {x:730,y:300,w:210,h:43,run:continueGame},
+        {x:730,y:341,w:210,h:42,run:()=>this.scene.start("Options")},
+        {x:730,y:381,w:210,h:42,run:()=>this.scene.start("Achievements")},
+        {x:730,y:420,w:210,h:42,run:()=>this.scene.start("Credits")},
+        {x:730,y:460,w:210,h:42,run:()=>showToast(this,"GRACIAS POR VISITAR AURALIA. PUEDES CERRAR ESTA PESTAÑA PARA SALIR.")}
+      ];
+      menuItems.forEach(item=>{
+        const hit=this.add.rectangle(item.x,item.y,item.w,item.h,0xffffff,0).setDepth(6).setInteractive({useHandCursor:true});
+        hit.on("pointerover",()=>hit.setFillStyle(0xffedc6,.075));
+        hit.on("pointerout",()=>hit.setFillStyle(0xffffff,0));
+        hit.on("pointerdown",item.run);
+      });
       this.input.keyboard.once("keydown-ENTER",newGame);
-      this.input.keyboard.on("keydown-C",()=>this.scene.start("Select",{level:progress.level,score:progress.score,lives:progress.lives,coins:progress.coins,hearts:progress.hearts,continue:true}));
+      this.input.keyboard.on("keydown-C",continueGame);
     }
   }
   class Select extends Phaser.Scene{
@@ -107,13 +119,15 @@
       this.add.text(W/2,98,"Ambos pueden vivir la aventura completa, pero cada uno tiene habilidades propias.",{fontSize:"15px",color:"#fff"}).setOrigin(.5);
       // Andrés card
       this.add.rectangle(285,285,330,310,0x162e50,.86).setStrokeStyle(3,0xe8c16b);
-      this.add.image(285,235,"andres_idle").setScale(3.15);
+      this.add.circle(285,235,79,0xe9c477,.14);
+      if(this.textures.exists("andresPortrait")){this.add.image(285,235,"andresPortrait").setDisplaySize(146,146).setDepth(3);this.add.rectangle(285,235,154,154,0xffffff,0).setStrokeStyle(3,0xe8c16b).setDepth(4)}else this.add.image(285,235,"andres_idle").setScale(1.575);
       this.add.text(285,345,"ANDRÉS",{fontFamily:"Georgia,serif",fontSize:"27px",fontStyle:"bold",color:"#ffdc83"}).setOrigin(.5);
       this.add.text(285,385,"ESPADA · FUERZA · ROMPE BLOQUES\nAtaque cercano poderoso.",{fontSize:"15px",color:"#f7f1df",align:"center",lineSpacing:7}).setOrigin(.5);
       button(this,285,465,"JUGAR COMO ANDRÉS",()=>this.begin("ANDRES"),{width:270,fill:0x8e4d55,fontSize:"16px"});
       // Vannesa card
       this.add.rectangle(675,285,330,310,0x332746,.88).setStrokeStyle(3,0xf0bad2);
-      this.add.image(675,235,"vannesa_idle").setScale(3.15);
+      this.add.circle(675,235,79,0xf0bad2,.14);
+      if(this.textures.exists("vannesaPortrait")){this.add.image(675,235,"vannesaPortrait").setDisplaySize(146,146).setDepth(3);this.add.rectangle(675,235,154,154,0xffffff,0).setStrokeStyle(3,0xf0bad2).setDepth(4)}else this.add.image(675,235,"vannesa_idle").setScale(1.575);
       this.add.text(675,345,"VANNESA",{fontFamily:"Georgia,serif",fontSize:"27px",fontStyle:"bold",color:"#ffc4df"}).setOrigin(.5);
       this.add.text(675,385,"MAGIA · AGILIDAD · DOBLE SALTO\nProyectiles mágicos a distancia.",{fontSize:"15px",color:"#f7f1df",align:"center",lineSpacing:7}).setOrigin(.5);
       button(this,675,465,"JUGAR COMO VANNESA",()=>this.begin("VANNESA"),{width:280,fill:0x774c91,fontSize:"16px"});
@@ -127,6 +141,8 @@
     create(){
       this.cameras.main.setBackgroundColor(0x17243d);
       const bg=this.add.graphics();bg.fillGradientStyle(0x17243d,0x17243d,0x4d5976,0x263a4b,1);bg.fillRect(0,0,W,H);
+      if(this.textures.exists("valleyIntroRemaster"))this.add.image(W/2,H/2,"valleyIntroRemaster").setDisplaySize(W,H).setAlpha(.50);
+      this.add.rectangle(W/2,H/2,W,H,0x111629,.30);
       const moon=this.add.circle(760,128,88,0xf3dca2,.12);this.tweens.add({targets:moon,scale:1.12,alpha:.05,duration:2200,yoyo:true,repeat:-1});
       for(let i=0;i<50;i++){const x=Phaser.Math.Between(0,W),y=Phaser.Math.Between(0,H);const p=this.add.circle(x,y,Phaser.Math.Between(1,3),0xffe8b5,.45);this.tweens.add({targets:p,alpha:.08,duration:900+Math.random()*1500,yoyo:true,repeat:-1})}
       this.add.text(W/2,66,"PRÓLOGO · AURALIA",{fontFamily:"Georgia,serif",fontSize:"18px",fontStyle:"bold",color:"#eacb83",letterSpacing:4}).setOrigin(.5);
@@ -157,7 +173,7 @@
       const music=safeGet("kol_music","1")==="1",sfx=safeGet("kol_sfx","1")==="1";
       this.musicText=this.add.text(W/2,155,"MÚSICA: "+(music?"ACTIVADA":"DESACTIVADA"),{fontSize:"20px",fontStyle:"bold",color:"#fff"}).setOrigin(.5).setInteractive();
       this.sfxText=this.add.text(W/2,220,"EFECTOS: "+(sfx?"ACTIVADOS":"DESACTIVADOS"),{fontSize:"20px",fontStyle:"bold",color:"#fff"}).setOrigin(.5).setInteractive();
-      this.musicText.on("pointerdown",()=>{const next=safeGet("kol_music","1")==="1"?"0":"1";safeSet("kol_music",next);audio.music=next==="1";this.musicText.setText("MÚSICA: "+(next==="1"?"ACTIVADA":"DESACTIVADA"))});
+      this.musicText.on("pointerdown",()=>{const next=safeGet("kol_music","1")==="1"?"0":"1";safeSet("kol_music",next);audio.music=next==="1";if(audio.music)startMusic(this,audio.worldIndex||0);else if(audio.track&&audio.track.isPlaying)audio.track.stop();this.musicText.setText("MÚSICA: "+(next==="1"?"ACTIVADA":"DESACTIVADA"))});
       this.sfxText.on("pointerdown",()=>{const next=safeGet("kol_sfx","1")==="1"?"0":"1";safeSet("kol_sfx",next);audio.sfx=next==="1";this.sfxText.setText("EFECTOS: "+(next==="1"?"ACTIVADOS":"DESACTIVADOS"))});
       this.musicVolumeText=this.add.text(W/2,282,"VOLUMEN DE MÚSICA: "+Math.round(audio.musicVolume*100)+"%",{fontSize:"17px",color:"#ffe8b1"}).setOrigin(.5);
       button(this,W/2-155,325,"−",()=>this.adjustVolume("music",-.1),{width:58,height:38,fontSize:"22px"});
@@ -173,21 +189,50 @@
       safeSet(channel==="music"?"kol_music_volume":"kol_sfx_volume",audio[key]);
       const label=channel==="music"?this.musicVolumeText:this.sfxVolumeText;
       label.setText((channel==="music"?"VOLUMEN DE MÚSICA: ":"VOLUMEN DE EFECTOS: ")+Math.round(audio[key]*100)+"%");
+      if(channel==="music"&&audio.track)audio.track.setVolume(audio.musicVolume);
       playTone(channel==="music"?660:440,.08,"sine",.05,channel);
     }
   }
   class Credits extends Phaser.Scene{
     constructor(){super("Credits")}
     create(){makeBackdrop(this,4,false);addStarField(this,35);this.add.text(W/2,105,"CRÉDITOS",{fontFamily:"Georgia,serif",fontSize:"38px",color:"#ffdf91"}).setOrigin(.5);
-      this.add.image(410,260,"andres_idle").setScale(2.4);this.add.image(550,260,"vannesa_idle").setScale(2.4);
+      this.add.image(410,260,"andres_idle").setScale(1.2);this.add.image(550,260,"vannesa_idle").setScale(1.2);
       this.add.text(W/2,360,CFG.credits||"Creado con cariño para Andrés y Vannesa.",{fontSize:"20px",color:"#fff",align:"center",wordWrap:{width:700}}).setOrigin(.5);
       button(this,W/2,455,"VOLVER",()=>this.scene.start("Title"),{width:210});
     }
   }
 
+  class Achievements extends Phaser.Scene{
+    constructor(){super("Achievements")}
+    create(){
+      makeBackdrop(this,4,false);addStarField(this,38);
+      this.add.rectangle(W/2,H/2,W,H,0x101629,.74);
+      this.add.text(W/2,58,"CRÓNICA DE AURALIA",{fontFamily:"Georgia,serif",fontSize:"34px",fontStyle:"bold",color:"#ffdf91",stroke:"#342943",strokeThickness:4}).setOrigin(.5);
+      this.add.text(W/2,94,"Cada nota recuperada deja una huella en el reino",{fontSize:"15px",color:"#e8dfca"}).setOrigin(.5);
+      const p=getProgress();
+      const entries=[
+        {title:"EL PRIMER ECO",desc:"Recupera tu primer fragmento de la Campana del Alba.",done:p.fragments>=1},
+        {title:"LAS CINCO NOTAS",desc:"Reúne los cinco fragmentos y restaura la armonía.",done:p.fragments>=5},
+        {title:"VIAJERO DE AURALIA",desc:"Alcanza el sexto capítulo de la aventura.",done:p.level>=5},
+        {title:"TESOROS DEL REINO",desc:"Reúne al menos 25 monedas durante tu viaje.",done:p.coins>=25},
+        {title:"HÉROE DE LEYENDA",desc:"Consigue una puntuación acumulada de 10.000 puntos.",done:p.score>=10000}
+      ];
+      entries.forEach((entry,i)=>{
+        const y=153+i*62,fill=entry.done?0x294b4b:0x20283b,stroke=entry.done?0xe8c16b:0x64708b;
+        this.add.rectangle(W/2,y,690,52,fill,.94).setStrokeStyle(2,stroke,.9);
+        this.add.text(160,y,entry.done?"✦":"◇",{fontSize:"24px",fontStyle:"bold",color:entry.done?"#ffe29a":"#8793ae"}).setOrigin(.5);
+        this.add.text(195,y-8,entry.title,{fontFamily:"Georgia,serif",fontSize:"16px",fontStyle:"bold",color:entry.done?"#ffe5a8":"#d0d6e5"}).setOrigin(0,.5);
+        this.add.text(195,y+13,entry.desc,{fontSize:"12px",color:"#e3e5ec"}).setOrigin(0,.5);
+        this.add.text(800,y,entry.done?"DESBLOQUEADO":"POR DESCUBRIR",{fontSize:"10px",fontStyle:"bold",color:entry.done?"#f3d58d":"#9da7bb"}).setOrigin(1,.5);
+      });
+      this.add.text(W/2,472,"FRAGMENTOS: "+p.fragments+"/5     MONEDAS: "+p.coins+"     PUNTOS: "+p.score,{fontSize:"13px",fontStyle:"bold",color:"#f5dca7"}).setOrigin(.5);
+      button(this,W/2,515,"VOLVER AL REINO",()=>this.scene.start("Title"),{width:230,height:36,fontSize:"15px"});
+    }
+  }
+
   class Play extends Phaser.Scene{
     constructor(){super("Play")}
-    init(data){this.levelIndex=Phaser.Math.Clamp(Number(data.level)||0,0,TOTAL-1);this.role=data.role||safeGet("kol_role","ANDRES");this.score=Number(data.score)||0;this.lives=data.lives===0?0:(Number(data.lives)||3);this.coinsCount=Number(data.coins)||0;this.heartsCount=Number(data.hearts)||0;this.fragmentsCount=Number(data.fragments??getProgress().fragments)||0;this.resonanceCount=0;this.checkpointX=100;this.invulnerable=0;this.actionCooldown=0;this.bossHitCooldown=0;this.finished=false;this.paused=false}
+    init(data){this.levelIndex=Phaser.Math.Clamp(Number(data.level)||0,0,TOTAL-1);this.role=data.role||safeGet("kol_role","ANDRES");this.score=Number(data.score)||0;this.lives=data.lives===0?0:(Number(data.lives)||3);this.coinsCount=Number(data.coins)||0;this.heartsCount=Number(data.hearts)||0;this.fragmentsCount=Number(data.fragments??getProgress().fragments)||0;this.resonanceCount=0;this.checkpointX=100;this.invulnerable=0;this.knockbackUntil=0;this.actionCooldown=0;this.actionState=null;this.lastAction=null;this.projectileLaunchCount=0;this.lastDamage=null;this.lastFall=null;this.lastEnemyHit=null;this.enemyKillCount=0;this.lastCompletion=null;this.bossHitCooldown=0;this.finished=false;this.paused=false}
     create(){
       Object.keys(TOUCH).forEach(k=>TOUCH[k]=false);
       const level=DATA.levels[this.levelIndex],world=DATA.worlds[level.world];this.level=level;this.world=world;this.levelLength=level.length;
@@ -196,11 +241,20 @@
       if(level.boss)this.createBoss();
       this.cameras.main.startFollow(this.player,true,.10,.10);
       this.physics.world.resume();
-      showToast(this,`${world.name} · NIVEL ${level.stage+1} — ${level.story||world.intro}`);
+      showToast(this,`${world.name} · NIVEL ${level.stage+1}`);
     }
     drawWorld(){
       if(this.level.world===0&&this.textures.exists("valleyPanorama")){
         this.add.tileSprite(0,0,this.levelLength,H,"valleyPanorama").setOrigin(0,0).setTileScale(.58,.58).setScrollFactor(.12).setAlpha(.92).setDepth(-5);
+      }
+      const productionChapter=this.levelIndex===0&&this.textures.exists("valleyProductionTiles");
+      if(productionChapter){
+        // The authored panorama and discrete tiles carry chapter 1. Skip the
+        // generic triangle mountains, round tree blobs and repeated V1/V2 overlays.
+        [[1510,350,20,3.25],[720,330,21,2.1],[2380,340,21,2.35]].forEach(([x,y,frame,scale])=>this.add.image(x,y,"valleyProductionTiles",frame).setScale(scale).setDepth(.35).setScrollFactor(.55));
+        [[180,5,.75],[485,6,.70],[690,14,.68],[945,7,.74],[1280,5,.70],[1610,18,.72],[1890,6,.72],[2210,14,.70],[2560,7,.76],[2820,5,.70]].forEach(([x,frame,scale],i)=>this.add.image(x,448,"valleyProductionTiles",frame).setScale(scale).setFlipX(i%2===1).setDepth(2.2));
+        [[330,12,1.05],[1150,12,.92],[1990,12,1.08],[2700,12,.96],[560,8,.70],[1450,19,.65],[2300,8,.72]].forEach(([x,frame,scale],i)=>this.add.image(x,454,"valleyProductionTiles",frame).setScale(scale).setFlipX(i%2===0).setDepth(2.1));
+        return;
       }
       const g=this.add.graphics();g.fillStyle(this.world.far,1);
       for(let x=-100;x<this.levelLength+400;x+=320){const peak=138+(Math.abs(Math.floor(x/320))%3)*34;g.fillTriangle(x,405,x+160,peak,x+330,405)}
@@ -230,6 +284,12 @@
         scenery.fillStyle(0x4a4e60,.72);scenery.fillRect(x,330,28,108);scenery.fillTriangle(x-8,332,x+14,290,x+36,332);scenery.fillStyle(this.world.accent,.82);scenery.fillRect(x+8,311,12,18);scenery.fillStyle(0x2f2c3d,.8);scenery.fillCircle(x+14,322,6);scenery.fillStyle(0xffe7a2,.85);scenery.fillRect(x+12,316,4,12);
       }
       scenery.setScrollFactor(.55);
+      if(this.levelIndex===0&&this.textures.exists("valleyProductionTiles")){
+        const landmark=this.add.image(1510,350,"valleyProductionTiles",20).setScale(3.25).setDepth(.55).setScrollFactor(.55);
+        landmark.setTint(0xffffff);
+        [[720,330,21,2.1],[2380,340,21,2.35]].forEach(([x,y,frame,scale])=>this.add.image(x,y,"valleyProductionTiles",frame).setScale(scale).setDepth(.35).setScrollFactor(.55));
+        [[180,5,.75],[485,6,.70],[690,14,.68],[945,7,.74],[1280,5,.70],[1610,18,.72],[1890,6,.72],[2210,14,.7],[2560,7,.76],[2820,5,.7]].forEach(([x,frame,scale],i)=>this.add.image(x,448,"valleyProductionTiles",frame).setScale(scale).setFlipX(i%2===1).setDepth(2.2));
+      }
       const decor=this.add.graphics();decor.fillStyle(this.world.accent,.42);
       for(let x=120;x<this.levelLength;x+=300){decor.fillCircle(x,449,5);decor.fillCircle(x+13,445,4);decor.fillRect(x+5,449,2,12)}
       decor.setDepth(2);
@@ -240,20 +300,24 @@
         const spark=this.add.image(cx,cy,"magic").setScale(.45).setAlpha(.0).setDepth(4);
         this.tweens.add({targets:spark,alpha:.55,y:cy-16,duration:850,yoyo:true,onComplete:()=>spark.destroy()});
       }});
+      if (window.AURALIA_REMASTER) window.AURALIA_REMASTER.decorateWorld(this);
     }
     buildPlatforms(){
       this.platforms=this.physics.add.staticGroup();
       const floor=this.platforms.create(this.levelLength/2,FLOOR+20,"ground");floor.setDisplaySize(this.levelLength,70).refreshBody();floor.setAlpha(0);
-      this.floorArt=this.add.tileSprite(0,FLOOR-15,this.levelLength,70,"ground").setOrigin(0,0).setTint(this.world.ground).setDepth(1);
+      const productionValley=this.levelIndex===0&&this.textures.exists("valleyProductionTiles");
+      this.floorArt=productionValley
+        ?this.add.tileSprite(0,FLOOR-15,this.levelLength,48,"valleyProductionTiles",0).setOrigin(0,0).setDepth(1)
+        :this.add.tileSprite(0,FLOOR-15,this.levelLength,70,"ground").setOrigin(0,0).setTint(this.world.ground).setDepth(1);
       const layout=this.level;
-      layout.platforms.forEach(([x,y,w])=>{const p=this.platforms.create(x,y,"platform");p.setDisplaySize(w,24).setTint(this.world.platform).refreshBody();p.setDepth(3)});
+      layout.platforms.forEach(([x,y,w])=>{const p=this.platforms.create(x,y,"platform");p.setDisplaySize(w,24).setTint(productionValley?0xffffff:this.world.platform).setAlpha(productionValley?0:1).refreshBody();p.setDepth(3);if(productionValley){this.add.tileSprite(x-w/2+8,y-12,Math.max(1,w-16),24,"valleyProductionTiles",1).setOrigin(0,0).setTileScale(1,.5).setDepth(3);this.add.image(x-w/2+6,y,"valleyProductionTiles",2).setDisplaySize(12,24).setDepth(3);this.add.image(x+w/2-6,y,"valleyProductionTiles",3).setDisplaySize(12,24).setDepth(3)}});
       if(layout.bossArena){const [a,b]=layout.bossArena;for(let i=0;i<5;i++){const x=a+70+i*95;const p=this.platforms.create(x,390-(i%2)*42,"platform");p.setDisplaySize(82,22).setTint(this.world.platform).refreshBody();p.setDepth(3)}}
       this.movingPlatforms=this.physics.add.group({allowGravity:false,immovable:true});
-      layout.moving.forEach(([x,y,w,min,max,speed])=>{const p=this.movingPlatforms.create(x,y,"moving_platform");p.setDisplaySize(w,22);p.setImmovable(true);p.body.setAllowGravity(false);p.setVelocityX(speed);p.setData("minX",min);p.setData("maxX",max);p.setData("travelSpeed",speed);p.setDepth(4)});
+      layout.moving.forEach(([x,y,w,min,max,speed])=>{const p=this.movingPlatforms.create(x,y,"moving_platform");if(productionValley)p.setTexture("valleyProductionTiles",9);p.setDisplaySize(w,22);p.setImmovable(true);p.body.setAllowGravity(false);p.setVelocityX(speed);p.setData("minX",min);p.setData("maxX",max);p.setData("travelSpeed",speed);p.setDepth(4)});
       this.crumblePlatforms=this.physics.add.group({allowGravity:false,immovable:true});
       layout.crumbles.forEach(([x,y,w])=>{const p=this.crumblePlatforms.create(x,y,"platform_crumble");p.setDisplaySize(w,22);p.setImmovable(true);p.body.setAllowGravity(false);p.setData("homeX",x);p.setData("homeY",y);p.setData("crumbling",false);p.setDepth(4)});
       this.breakables=this.physics.add.staticGroup();
-      layout.breakables.forEach(([x,y])=>{const b=this.breakables.create(x,y,"block");b.setDepth(4).refreshBody()});
+      layout.breakables.forEach(([x,y])=>{const b=this.breakables.create(x,y,"block");if(productionValley)b.setTexture("valleyProductionTiles",4).setDisplaySize(32,32);b.setDepth(4).refreshBody()});
       this.traps=this.physics.add.staticGroup();
       layout.traps.forEach(([x,kind,y,w])=>{const key=kind==="fire"?"fire":kind==="ice"?"ice":kind==="thorn"?"thorn":"spike";const trap=this.traps.create(x,y,key);trap.setDisplaySize(w,kind==="fire"?30:22).refreshBody();trap.setDepth(5);trap.setData("kind",kind)});
     }
@@ -282,8 +346,9 @@
     }
     buildResonators(){
       this.resonators=this.physics.add.group({allowGravity:false,immovable:true});
+      const productionValley=this.levelIndex===0&&this.textures.exists("valleyProductionTiles");
       (this.level.resonators||[]).forEach(([x,y],index)=>{
-        const bell=this.resonators.create(x,y,"resonator");bell.body.setAllowGravity(false);bell.body.setSize(22,38).setOffset(5,4);bell.setDepth(9);bell.setData("index",index);
+        const bell=this.resonators.create(x,y,productionValley?"valleyProductionTiles":"resonator",productionValley?23:undefined);bell.setDisplaySize(32,48);bell.body.setAllowGravity(false);bell.body.setSize(22,38).setOffset(5,4);bell.setDepth(9);bell.setData("index",index);
         this.tweens.add({targets:bell,angle:{from:-4,to:4},duration:1150,yoyo:true,repeat:-1,ease:"Sine.inOut"});
         const glow=this.add.circle(x,y,27,this.world.accent,.10).setDepth(7);
         this.tweens.add({targets:glow,scale:1.5,alpha:.02,duration:1250,yoyo:true,repeat:-1});
@@ -294,12 +359,13 @@
       }
     }
     ringResonance(){
+      if(this.actionState)return;
       if(this.time.now<(this.resonanceCooldown||0))return;
       const bell=this.resonators?.getChildren().find(node=>node.active);
       if(!bell){showToast(this,"EL ECO YA HA DESPERTADO ESTE CAMINO.");return}
       const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,bell.x,bell.y);
       if(distance>138){showToast(this,"ACÉRCATE AL RESONADOR PARA ESCUCHAR SU ECO.");return}
-      this.resonanceCooldown=this.time.now+1000;bell.destroy();this.resonanceCount++;this.score+=250;
+      this.resonanceCooldown=this.time.now+1000;this.resonanceUntil=this.time.now+440;bell.destroy();this.resonanceCount++;this.score+=250;
       const echoRole=this.role==="VANNESA"?"ANDRES":"VANNESA";
       const echo=this.add.image(this.player.x-this.facing*42,this.player.y,charTexture(echoRole,"victory")).setAlpha(.78).setTint(this.world.accent).setFlipX(this.facing<0).setDepth(11);
       this.tweens.add({targets:echo,x:this.player.x+this.facing*96,y:this.player.y-16,alpha:0,duration:720,ease:"Sine.out",onComplete:()=>echo.destroy()});
@@ -322,7 +388,9 @@
     buildEnemies(){
       this.enemies=this.physics.add.group();
       this.level.enemies.forEach(([x,kind,min,max,speed])=>{
-        const key="enemy_"+kind;const e=this.enemies.create(x,kind==="moth"?FLOOR-125:FLOOR-23,this.textures.exists(key)?key:"enemy");
+        // Non-flying enemy hitboxes are 22 px high with a +7 px body offset.
+        // Spawn at y=FLOOR-44 so their bottom is on (not inside) the floor top.
+        const key="enemy_"+kind;const e=this.enemies.create(x,kind==="moth"?FLOOR-125:FLOOR-44,this.textures.exists(key)?key:"enemy");
         e.setCollideWorldBounds(true);e.setBounce(0,0);e.setVelocityX(speed*(Math.random()<.5?-1:1));e.setData("kind",kind);e.setData("minX",min);e.setData("maxX",max);e.setData("baseY",e.y);e.setData("baseSpeed",speed);e.setData("hp",kind==="guard"?2:1);e.setDepth(8);
         if(kind==="moth"){e.body.setAllowGravity(false);e.body.setSize(25,18).setOffset(5,7)}else{e.body.setSize(25,22).setOffset(4,7)}
       });
@@ -332,17 +400,25 @@
     }
     buildPlayer(){
       const savedCp=Number(safeGet("kol_checkpoint_"+this.levelIndex,"100"))||100;this.checkpointX=Math.max(100,Math.min(this.levelLength-200,savedCp));
-      this.player=this.physics.add.sprite(this.checkpointX,FLOOR-38,charTexture(this.role,"idle"));this.player.setScale(1.2);this.player.setCollideWorldBounds(true);this.player.setDepth(10);this.player.setDragX(this.level.world===2?360:1100);this.player.setMaxVelocity(310,650);this.player.body.setSize(21,39).setOffset(5,7);
+      const referenceFrame=window.AURALIA_REMASTER?.frameFor?.(this.role,"idle");
+      this.usesReferenceCharacter=!!(referenceFrame&&this.textures.exists(referenceFrame.key));
+      this.player=this.physics.add.sprite(this.checkpointX,FLOOR-38,referenceFrame?.key||charTexture(this.role,"idle"),referenceFrame?.frame);
+      if(this.usesReferenceCharacter)this.player.setScale(.30).setOrigin(.5,.97);else this.player.setScale(.6);
+      this.player.setCollideWorldBounds(true);this.player.setDepth(10);this.player.setDragX(this.level.world===2?360:1100);this.player.setMaxVelocity(310,650);
+      if(this.usesReferenceCharacter)this.player.body.setSize(84,156).setOffset(84,65);else this.player.body.setSize(42,78).setOffset(10,14);
+      this.player.on("animationupdate",this.handleActionAnimationUpdate,this);
+      this.player.on("animationcomplete",this.handleActionAnimationComplete,this);
+      this.events.once("shutdown",()=>{this.actionState=null});
       this.maxJumps=this.role==="VANNESA"?2:1;this.jumpCount=0;this.facing=1;this.lastTouchJump=false;this.lastTouchAction=false;this.wasGrounded=false;
       this.physics.add.collider(this.player,this.platforms);
       this.physics.add.collider(this.player,this.breakables);
       this.physics.add.collider(this.player,this.movingPlatforms);
       this.physics.add.collider(this.player,this.crumblePlatforms,(player,platform)=>this.activateCrumble(platform),null,this);
-      if(this.traps)this.physics.add.overlap(this.player,this.traps,()=>this.hurt(),undefined,this);
+      if(this.traps)this.physics.add.overlap(this.player,this.traps,()=>this.hurt("trap"),undefined,this);
       this.projectiles=this.physics.add.group({allowGravity:false});
       this.physics.add.collider(this.projectiles,this.platforms,shot=>shot.destroy());
       this.hazards=this.physics.add.group({allowGravity:false});
-      this.physics.add.overlap(this.player,this.hazards,()=>this.hurt(),undefined,this);
+      this.physics.add.overlap(this.player,this.hazards,()=>this.hurt("hazard"),undefined,this);
     }
     buildExit(){
       this.exit=this.physics.add.staticSprite(this.levelLength-85,FLOOR-34,"door");this.exit.setDepth(3);this.physics.add.overlap(this.player,this.exit,()=>this.tryExit());
@@ -373,9 +449,14 @@
     }
     enemyContact(player,enemy){
       if(!enemy.active||this.invulnerable>0)return;
-      if(player.body.velocity.y>120&&player.y<enemy.y-5){this.killEnemy(enemy);player.setVelocityY(-300)}else this.hurt();
+      if(player.body.velocity.y>120&&player.y<enemy.y-5){
+        this.killEnemy(enemy);
+        player.setVelocityY(-300);
+      }else{
+        this.hurt("enemy-contact",Math.sign(player.x-enemy.x));
+      }
     }
-    killEnemy(enemy){if(!enemy||!enemy.active)return;const hp=(enemy.getData("hp")||1)-1;if(hp>0){enemy.setData("hp",hp);enemy.setTint(0xffd16e);enemy.setVelocityX(-enemy.body.velocity.x*1.35);this.time.delayedCall(180,()=>{if(enemy.active)enemy.clearTint()});playTone(190,.06,"square",.03);return}const x=enemy.x,y=enemy.y;enemy.destroy();this.score+=150;this.updateHud();this.floatText(x,y-20,"+150");playTone(250,.07,"square",.035)}
+    killEnemy(enemy){if(!enemy||!enemy.active)return;const hpBefore=enemy.getData("hp")||1,hp=hpBefore-1;this.lastEnemyHit={kind:enemy.getData("kind"),x:Math.round(enemy.x),y:Math.round(enemy.y),hpBefore,hpAfter:Math.max(0,hp),destroyed:hp<=0};if(hp>0){enemy.setData("hp",hp);enemy.setTint(0xffd16e);enemy.setVelocityX(-enemy.body.velocity.x*1.35);this.time.delayedCall(180,()=>{if(enemy.active)enemy.clearTint()});playTone(190,.06,"square",.03);return}const x=enemy.x,y=enemy.y;this.enemyKillCount++;enemy.destroy();this.score+=150;this.updateHud();this.floatText(x,y-20,"+150");playTone(250,.07,"square",.035)}
     createBoss(){
       const arena=this.level.bossArena||[this.levelLength-650,this.levelLength-40];
       this.bossBounds={min:arena[0]+70,max:arena[1]-80};
@@ -385,7 +466,7 @@
       this.boss.body.setSize(46,55).setOffset(9,8);
       this.bossHp=6+this.level.world*2;this.bossMaxHp=this.bossHp;this.bossPhase=1;this.bossAttackCount=0;this.bossDefeated=false;
       this.physics.add.overlap(this.player,this.boss,()=>{
-        if(this.player.body.velocity.y>100&&this.player.y<this.boss.y-20){this.damageBoss(1);this.player.setVelocityY(-330)}else if(this.invulnerable<=0)this.hurt();
+        if(this.player.body.velocity.y>100&&this.player.y<this.boss.y-20){this.damageBoss(1);this.player.setVelocityY(-330)}else if(this.invulnerable<=0)this.hurt("boss-contact");
       });
       this.physics.add.overlap(this.projectiles,this.boss,shot=>{shot.destroy();this.damageBoss(1)});
       this.bossTimer=this.time.addEvent({delay:1500,loop:true,callback:()=>this.bossAttack()});
@@ -428,21 +509,48 @@
       this.updateBossHud();this.score+=100;this.updateHud();playTone(180,.11,"sawtooth",.045);
       if(this.bossHp<=0){this.bossDefeated=true;this.bossTimer?.remove(false);this.boss.destroy();if(this.bossBar)this.bossBar.destroy();if(this.bossBarBg)this.bossBarBg.destroy();this.score+=1000;this.fragmentsCount=Math.max(this.fragmentsCount,this.level.world+1);this.updateHud();showToast(this,`FRAGMENTO ${this.fragmentsCount}/5 RECUPERADO · LA CAMPANA RECUERDA`);playTone(740,.3,"triangle",.05);saveProgress({level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount,lives:this.lives,checkpoint:this.checkpointX})}
     }
-    performAction(){
-      if(this.time.now<this.actionCooldown)return;this.actionCooldown=this.time.now+(this.role==="VANNESA"?480:390);
+    handleActionAnimationUpdate(animation,frame){
+      const action=this.actionState;
+      if(!action||action.phase!=="anticipation"||animation?.key!==action.animationKey)return;
+      if(frame?.index!==action.impactSequenceIndex||Number(frame?.textureFrame)!==action.impactTextureFrame)return;
+      action.hitSequenceIndex=frame.index;action.hitTextureFrame=frame.textureFrame;
+      this.resolveActionImpact(action);
+    }
+    handleActionAnimationComplete(animation){
+      const action=this.actionState;
+      if(!action||animation?.key!==action.animationKey)return;
+      if(!action.impactApplied){action.phase="cancelled-before-impact";this.actionState=null;return}
+      action.phase="recovery";action.recoveryUntil=this.time.now+action.recoveryMs;
+    }
+    resolveActionImpact(action){
+      if(!action||action.impactApplied||!this.player?.active||this.finished)return;
+      action.phase="impact";action.impactApplied=true;
       if(this.role==="VANNESA"){
-        this.attackUntil=this.time.now+210;const p=this.projectiles.create(this.player.x+this.facing*24,this.player.y-2,"magic");p.body.setAllowGravity(false);p.setVelocityX(this.facing*390);p.setTint(0xffc4ff);p.setDepth(8);this.time.delayedCall(1800,()=>{if(p.active)p.destroy()});playTone(620,.09,"sine",.045);
+        const p=this.projectiles.create(action.origin.x+action.origin.facing*24,action.origin.y-2,"magic");this.projectileLaunchCount++;action.projectileCreated=true;p.body.setAllowGravity(false);p.setVelocityX(action.origin.facing*390);p.setTint(0xffc4ff);p.setDepth(8);this.time.delayedCall(1800,()=>{if(p.active)p.destroy()});playTone(620,.09,"sine",.045);
       }else{
-        this.attackUntil=this.time.now+240;this.player.setTexture(charTexture(this.role,"attack"));
-        const center=this.player.x+this.facing*42;
-        this.enemies.children.iterate(e=>{if(e?.active&&Math.abs(e.x-center)<62&&Math.abs(e.y-this.player.y)<58)this.killEnemy(e)});
-        if(this.boss?.active&&Math.abs(this.boss.x-center)<90&&Math.abs(this.boss.y-this.player.y)<90)this.damageBoss(1);
-        this.breakables.children.iterate(b=>{if(b?.active&&Math.abs(b.x-center)<64&&Math.abs(b.y-this.player.y)<70){const x=b.x,y=b.y;b.destroy();this.score+=100;this.updateHud();this.floatText(x,y-15,"¡SECRETO!")}});
+        const swing=action.origin;
+        this.enemies.children.iterate(e=>{if(e?.active&&Math.abs(e.x-swing.x)<62&&Math.abs(e.y-swing.y)<58)this.killEnemy(e)});
+        if(this.boss?.active&&Math.abs(this.boss.x-swing.x)<90&&Math.abs(this.boss.y-swing.y)<90)this.damageBoss(1);
+        this.breakables.children.iterate(b=>{if(b?.active&&Math.abs(b.x-swing.x)<64&&Math.abs(b.y-swing.y)<70){const x=b.x,y=b.y;b.destroy();this.score+=100;this.updateHud();this.floatText(x,y-15,"¡SECRETO!")}});
         playTone(145,.10,"sawtooth",.05);
       }
     }
-    hurt(){
-      if(this.invulnerable>0||this.finished)return;if(this.powerUntil&&this.time.now<this.powerUntil){showToast(this,"EL ESCUDO DEL AMOR TE PROTEGE");return}this.lives--;this.invulnerable=1400;this.player.setTint(0xff7777);this.player.setVelocity(-this.facing*170,-240);this.updateHud();saveProgress({level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount,lives:this.lives,checkpoint:this.checkpointX});playTone(105,.22,"sawtooth",.05);
+    performAction(){
+      if(this.time.now<this.actionCooldown||this.actionState)return;
+      const timeline=window.AURALIA_REMASTER?.actionTimeline?.(this.role);
+      if(!timeline)return;
+      this.actionCooldown=this.time.now+(this.role==="VANNESA"?480:390);
+      const origin=this.role==="VANNESA"?{x:this.player.x,y:this.player.y,facing:this.facing}:{x:this.player.x+this.facing*42,y:this.player.y};
+      this.actionState={...timeline,phase:"anticipation",impactApplied:false,origin};
+      this.lastAction=this.actionState;
+      if(!this.usesReferenceCharacter||!this.anims.exists(timeline.animationKey)){
+        // Functional compatibility path for the legacy art; there is no frame
+        // marker to sync until production animation assets replace it.
+        this.resolveActionImpact(this.actionState);this.actionState.phase="recovery";this.actionState.recoveryUntil=this.time.now+timeline.recoveryMs;
+      }
+    }
+    hurt(source="unknown",direction=null){
+      if(this.invulnerable>0||this.finished)return;if(this.powerUntil&&this.time.now<this.powerUntil){showToast(this,"EL ESCUDO DEL AMOR TE PROTEGE");return}this.lastDamage={source,at:Math.round(this.time.now),x:Math.round(this.player.x),y:Math.round(this.player.y),livesBefore:this.lives,livesAfter:this.lives-1,checkpoint:this.checkpointX};if(this.actionState)this.actionState.phase="interrupted-by-damage";this.actionState=null;this.lives--;this.invulnerable=1400;this.player.setTint(0xff7777);this.knockbackUntil=this.time.now+280;const knockbackX=Math.sign(Number(direction))||-this.facing;this.player.setVelocity(knockbackX*190,-240);this.updateHud();saveProgress({level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount,lives:this.lives,checkpoint:this.checkpointX});playTone(105,.22,"sawtooth",.05);
       this.time.delayedCall(430,()=>{if(this.player?.active)this.player.clearTint()});
       if(this.lives<=0){this.time.delayedCall(450,()=>this.scene.start("GameOver",{level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount}));}
     }
@@ -453,10 +561,17 @@
       this.completeLevel();
     }
     completeLevel(){
-      if(this.finished)return;this.finished=true;const next=this.levelIndex+1;saveProgress({level:Math.min(next,TOTAL-1),role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount,lives:this.lives,checkpoint:100});
+      if(this.finished)return;this.finished=true;if(this.actionState)this.actionState.phase="interrupted-level-end";this.actionState=null;const next=this.levelIndex+1;this.lastCompletion={nextLevel:next,role:this.role,score:this.score,lives:this.lives};this.physics.world.pause();this.player.setVelocity(0,0);
+      const victoryAnimation=window.AURALIA_REMASTER?.animationFor?.(this.role,"victory"),victoryFrame=window.AURALIA_REMASTER?.frameFor?.(this.role,"victory");
+      if(victoryAnimation&&this.anims.exists(victoryAnimation)){this.player.anims.play(victoryAnimation);this.lastCharacterAnimation=victoryAnimation}
+      else if(victoryFrame)this.player.setTexture(victoryFrame.key,victoryFrame.frame);
+      else this.player.setTexture(charTexture(this.role,"victory"));
+      saveProgress({level:Math.min(next,TOTAL-1),role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount,lives:this.lives,checkpoint:100});
       safeSet("kol_checkpoint_"+this.levelIndex,100);if(next<TOTAL)safeSet("kol_checkpoint_"+next,100);
-      if(next<TOTAL)this.scene.start("Intermission",{level:this.levelIndex,next,role:this.role,score:this.score,lives:this.lives,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount});
-      else this.scene.start("Finale",{score:this.score,hearts:this.heartsCount,role:this.role,fragments:this.fragmentsCount});
+      this.time.delayedCall(750,()=>{
+        if(next<TOTAL)this.scene.start("Intermission",{level:this.levelIndex,next,role:this.role,score:this.score,lives:this.lives,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount});
+        else this.scene.start("Finale",{score:this.score,hearts:this.heartsCount,role:this.role,fragments:this.fragmentsCount});
+      });
     }
     togglePause(){
       if(this.paused){this.physics.world.resume();this.pausePanel?.destroy(true);this.pausePanel=null;this.paused=false;return}
@@ -470,6 +585,7 @@
     }
     update(time,delta){
       if(this.paused||!this.player?.active||this.finished)return;
+      if(this.actionState?.phase==="recovery"&&time>=this.actionState.recoveryUntil){this.actionState.phase="complete";this.actionState.completedAt=time;this.actionState=null}
       const left=this.cursors.left.isDown||this.keys.a.isDown||TOUCH.left;
       const right=this.cursors.right.isDown||this.keys.d.isDown||TOUCH.right;
       const jumpKey=Phaser.Input.Keyboard.JustDown(this.keys.space)||Phaser.Input.Keyboard.JustDown(this.cursors.up)||Phaser.Input.Keyboard.JustDown(this.keys.w);
@@ -480,7 +596,13 @@
       const resonanceKey=Phaser.Input.Keyboard.JustDown(this.keys.resonance);
       const resonanceTouch=TOUCH.resonance&&!this.lastTouchResonance;this.lastTouchResonance=TOUCH.resonance;
       const run=this.keys.shift.isDown||TOUCH.run;const speed=run?275:185;
-      if(left){this.player.setVelocityX(-speed);this.facing=-1;this.player.setFlipX(true)}else if(right){this.player.setVelocityX(speed);this.facing=1;this.player.setFlipX(false)}else if(this.level.world===2){this.player.setVelocityX(this.player.body.velocity.x*Math.pow(.965,delta/16.666))}else this.player.setVelocityX(0);
+      const knockbackActive=time<(this.knockbackUntil||0);
+      if(!knockbackActive){
+        if(left){this.player.setVelocityX(-speed);this.facing=-1;this.player.setFlipX(true)}
+        else if(right){this.player.setVelocityX(speed);this.facing=1;this.player.setFlipX(false)}
+        else if(this.level.world===2){this.player.setVelocityX(this.player.body.velocity.x*Math.pow(.965,delta/16.666))}
+        else this.player.setVelocityX(0);
+      }
       const grounded=this.player.body.blocked.down||this.player.body.touching.down;
       if(grounded)this.jumpCount=0;
       if((jumpKey||jumpTouch)&&this.jumpCount<this.maxJumps){this.player.setVelocityY(this.jumpCount===0?-418:-365);this.jumpCount++;this.jumpStartedAt=time;this.jumpHeldFrames=0;playTone(420,.07,"square",.025)}
@@ -503,11 +625,29 @@
       if(this.boss?.active){if(this.boss.x<this.bossBounds.min)this.boss.setVelocityX(Math.abs(this.boss.body.velocity.x));if(this.boss.x>this.bossBounds.max)this.boss.setVelocityX(-Math.abs(this.boss.body.velocity.x))}
       if(this.invulnerable>0){this.invulnerable-=delta;if(Math.floor(time/90)%2===0)this.player.setAlpha(.55);else this.player.setAlpha(1)}else this.player.setAlpha(1);
       if(this.powerUntil&&time>this.powerUntil){this.player.clearTint();this.powerUntil=0}
-      if(this.player.y>H+100){this.lives--;this.updateHud();saveProgress({level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount,lives:this.lives,checkpoint:this.checkpointX});if(this.lives<=0)this.scene.start("GameOver",{level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount});else{this.player.setPosition(this.checkpointX,FLOOR-38);this.player.setVelocity(0,0);this.invulnerable=1200}}
+      if(this.player.y>H+100){this.lastFall={x:Math.round(this.player.x),y:Math.round(this.player.y),livesBefore:this.lives,livesAfter:this.lives-1,checkpoint:this.checkpointX};this.lives--;this.updateHud();saveProgress({level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount,lives:this.lives,checkpoint:this.checkpointX});if(this.lives<=0)this.scene.start("GameOver",{level:this.levelIndex,role:this.role,score:this.score,coins:this.coinsCount,hearts:this.heartsCount,fragments:this.fragmentsCount});else{this.player.setPosition(this.checkpointX,FLOOR-38);this.player.setVelocity(0,0);this.invulnerable=1200}}
       const groundedNow=this.player.body.blocked.down||this.player.body.touching.down;
+      if(groundedNow&&!this.wasGrounded)this.landUntil=time+135;
+      this.wasGrounded=groundedNow;
       let pose="idle";
-      if(this.invulnerable>0)pose="hurt";else if(time<(this.attackUntil||0))pose=this.role==="VANNESA"?"cast":"attack";else if(!groundedNow)pose=this.player.body.velocity.y<0?"jump":"fall";else if(Math.abs(this.player.body.velocity.x)>20)pose=(Math.floor(time/(run?85:135))%2===0?"walk1":"walk2");
-      if(time>(this.lastPoseTime||0)+70){const key=charTexture(this.role,pose);if(this.player.texture.key!==key)this.player.setTexture(key);this.lastPoseTime=time}
+      if(this.invulnerable>0)pose="hurt";else if(this.actionState)pose=this.actionState.pose;else if(time<(this.resonanceUntil||0))pose="resonance";else if(time<(this.landUntil||0))pose="land";else if(!groundedNow)pose=this.player.body.velocity.y<0?"jump":"fall";else if(Math.abs(this.player.body.velocity.x)>20){const frame=Math.floor(time/(run?92:135))%2;pose=run?(frame===0?"run1":"run2"):(frame===0?"walk1":"walk2")}
+      const walking=pose==="walk1"||pose==="walk2",running=pose==="run1"||pose==="run2";
+      const movementAnimation=walking||running?(this.role.toLowerCase()+"-"+(running?"run":"walk")):null;
+      if(this.usesReferenceCharacter){
+        const referencePose=walking?"walk":running?"run":pose;
+        const referenceAnimation=window.AURALIA_REMASTER.animationFor(this.role,referencePose);
+        if(referenceAnimation&&this.anims.exists(referenceAnimation)){
+          if(this.lastCharacterAnimation!==referenceAnimation){this.player.anims.play(referenceAnimation);this.lastCharacterAnimation=referenceAnimation;}
+        }else{
+          const frame=window.AURALIA_REMASTER.frameFor(this.role,referencePose);
+          if(frame&&this.lastCharacterAnimation!==referencePose){this.player.anims.stop();this.player.setTexture(frame.key,frame.frame);this.lastCharacterAnimation=referencePose;}
+        }
+      }else if(movementAnimation&&this.anims.exists(movementAnimation)){
+        if(!this.player.anims.isPlaying||this.player.anims.currentAnim?.key!==movementAnimation)this.player.anims.play(movementAnimation,true);
+      }else if(time>(this.lastPoseTime||0)+70){
+        if(this.player.anims?.isPlaying)this.player.anims.stop();
+        const key=charTexture(this.role,pose);if(this.player.texture.key!==key)this.player.setTexture(key);this.lastPoseTime=time;
+      }
       if(this.progressFill)this.progressFill.width=Math.max(2,146*Math.min(1,this.player.x/this.levelLength));
     }
   }
@@ -519,7 +659,7 @@
       this.add.text(W/2,105,"¡CAPÍTULO COMPLETADO!",{fontFamily:"Georgia,serif",fontSize:"36px",color:"#fff0be",stroke:"#46334b",strokeThickness:4}).setOrigin(.5);
       this.add.text(W/2,180,world.name+"\n"+world.short+" · NIVEL "+(level.stage+1),{fontSize:"22px",color:"#fff",align:"center",lineSpacing:8}).setOrigin(.5);
       this.add.text(W/2,245,level.story||world.intro,{fontSize:"16px",color:"#f7e9ce",align:"center",wordWrap:{width:700}}).setOrigin(.5);
-      this.add.image(420,320,d.role==="VANNESA"?"vannesa_idle":"andres_idle").setScale(2.3);this.add.image(525,320,d.role==="VANNESA"?"andres_idle":"vannesa_idle").setScale(2.3);
+      this.add.image(420,320,d.role==="VANNESA"?"vannesa_idle":"andres_idle").setScale(1.15);this.add.image(525,320,d.role==="VANNESA"?"andres_idle":"vannesa_idle").setScale(1.15);
       this.add.text(W/2,405,`Puntos: ${d.score}    Vidas: ${d.lives}    Monedas: ${d.coins}    Corazones: ${d.hearts}    Fragmentos: ${d.fragments||0}/5`,{fontSize:"18px",color:"#fff1ce"}).setOrigin(.5);
       button(this,340,475,"SIGUIENTE NIVEL",()=>this.scene.start("Play",{level:d.next,role:d.role,score:d.score,lives:d.lives,coins:d.coins,hearts:d.hearts,fragments:d.fragments}),{width:260});
       button(this,650,475,"CAMBIAR PROTAGONISTA",()=>this.scene.start("Select",{level:d.next,score:d.score,lives:d.lives,coins:d.coins,hearts:d.hearts,fragments:d.fragments}),{width:240,fill:0x754b83,fontSize:"16px"});
@@ -544,7 +684,7 @@
       makeBackdrop(this,4,false);addStarField(this,80);
       const glow=this.add.circle(W/2,220,130,0xffd783,.10);this.tweens.add({targets:glow,scale:1.18,alpha:.04,duration:1700,yoyo:true,repeat:-1});
       this.add.text(W/2,54,"EL REENCUENTRO",{fontFamily:"Georgia,serif",fontSize:"33px",color:"#ffdf93",stroke:"#39283f",strokeThickness:4}).setOrigin(.5);
-      const a=this.add.image(420,200,"andres_victory").setScale(2.8),v=this.add.image(530,200,"vannesa_victory").setScale(2.8);
+      const a=this.add.image(420,200,"andres_victory").setScale(1.4),v=this.add.image(530,200,"vannesa_victory").setScale(1.4);
       this.tweens.add({targets:[a,v],y:"-=8",duration:900,yoyo:true,repeat:-1});
       this.add.text(W/2,295,`${CFG.heroName||"ANDRÉS"}  ♥  ${CFG.princessName||"VANNESA"}`,{fontFamily:"Georgia,serif",fontSize:"30px",fontStyle:"bold",color:"#fff0ca"}).setOrigin(.5);
       this.add.text(W/2,318,"DOS PROTAGONISTAS. UNA AVENTURA COMPARTIDA.",{fontSize:"12px",fontStyle:"bold",color:"#f6dca0",letterSpacing:2}).setOrigin(.5);
@@ -564,8 +704,36 @@
     type:Phaser.AUTO,parent:"game",width:W,height:H,backgroundColor:"#11182b",pixelArt:true,roundPixels:true,
     scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
     physics:{default:"arcade",arcade:{gravity:{y:980},debug:false}},
-    input:{activePointers:3},scene:[Boot,Title,Select,Prologue,Options,Credits,Play,Intermission,GameOver,Finale]
+    input:{activePointers:3},scene:[Boot,Title,Select,Prologue,Options,Credits,Achievements,Play,Intermission,GameOver,Finale]
   });
+  if(typeof location!=="undefined"&&location.search.includes("qa-capture")){
+    window.LOVE_GAME_QA=Object.freeze({
+      game,
+      startChapter(role){game.scene.start("Play",{level:0,role:role==="VANNESA"?"VANNESA":"ANDRES",score:0,lives:3,coins:0,hearts:0,fragments:0})},
+      inspectPlayer(){
+        const scene=game.scene.getScene("Play"),player=scene?.player;
+        const activeScenes=game.scene.getScenes(true).map(active=>active.scene.key);
+        if(!player?.active||!activeScenes.includes("Play"))return {scenes:activeScenes,role:readSave()?.role||null,savedProgress:readSave(),lastDamage:scene?.lastDamage||null,lastFall:scene?.lastFall||null,lastEnemyHit:scene?.lastEnemyHit||null,enemyKillCount:scene?.enemyKillCount||0,lastCompletion:scene?.lastCompletion||null,gameOverData:game.scene.getScene("GameOver")?.d||null,animation:null,playing:false};
+        const actionKey=scene.role==="VANNESA"?"ref-vannesa-special":"ref-andres-attack";
+        const actionFrames=scene.anims?.get?.(actionKey)?.frames?.map(frame=>({index:frame.index,textureFrame:frame.textureFrame,frameName:frame.frame?.name??null,textureKey:frame.textureKey??null}))||[];
+        return {role:scene.role,animation:player.anims?.currentAnim?.key||null,playing:!!player.anims?.isPlaying,frame:player.frame?.name??null,texture:player.texture?.key||null,bodyWidth:player.body?.width??null,bodyHeight:player.body?.height??null,bodyX:player.body?.x??null,bodyY:player.body?.y??null,playerX:player.x,playerY:player.y,velocityX:player.body?.velocity?.x??null,velocityY:player.body?.velocity?.y??null,grounded:!!(player.body?.blocked?.down||player.body?.touching?.down),jumpCount:scene.jumpCount??null,lives:scene.lives,score:scene.score,actionFrames,savedProgress:readSave(),actionPhase:scene.actionState?.phase||null,actionImpactApplied:scene.actionState?.impactApplied??null,lastAction:scene.lastAction?{phase:scene.lastAction.phase,animationKey:scene.lastAction.animationKey,hitSequenceIndex:scene.lastAction.hitSequenceIndex??null,hitTextureFrame:scene.lastAction.hitTextureFrame??null,impactApplied:scene.lastAction.impactApplied,projectileCreated:scene.lastAction.projectileCreated??false}:null,projectileCount:scene.projectiles?.countActive?.()??null,projectileLaunchCount:scene.projectileLaunchCount};
+      },
+      inspectAssets(){
+        const tile=game.textures.get("valleyProductionTiles");
+        const frameNames=tile?(typeof tile.getFrameNames==="function"?tile.getFrameNames():Object.keys(tile.frames||{})):[];
+        return {renderer:game.renderer.type===Phaser.WEBGL?"WebGL":game.renderer.type===Phaser.CANVAS?"Canvas":"Other",tilesetLoaded:game.textures.exists("valleyProductionTiles"),tilesetFrames:frameNames.filter(name=>name!=="__BASE").length,andresSheetLoaded:game.textures.exists("andresGameplaySheet"),vannesaSheetLoaded:game.textures.exists("vannesaGameplaySheet"),chapterMusicLoaded:!!game.cache.audio?.exists?.("auralia_world_0")};
+      },
+      inspectLevel(){
+        const scene=game.scene.getScene("Play"),active=group=>group?.getChildren?.().filter(item=>item?.active)||[];
+        const activeScenes=game.scene.getScenes(true).map(item=>item.scene.key);
+        if(!scene?.player?.active||!activeScenes.includes("Play"))return {scenes:activeScenes,role:readSave()?.role||null,savedProgress:readSave(),lastDamage:scene?.lastDamage||null,lastFall:scene?.lastFall||null,lastEnemyHit:scene?.lastEnemyHit||null,enemyKillCount:scene?.enemyKillCount||0,lastCompletion:scene?.lastCompletion||null,gameOverData:game.scene.getScene("GameOver")?.d||null};
+        const coords=items=>active(items).map(item=>({x:Math.round(item.x),y:Math.round(item.y),active:item.active}));
+        return {index:scene.levelIndex,stage:scene.level?.stage,world:scene.world?.name,length:scene.levelLength,finished:scene.finished,lastDamage:scene.lastDamage,lastFall:scene.lastFall,lastEnemyHit:scene.lastEnemyHit,enemyKillCount:scene.enemyKillCount,lastCompletion:scene.lastCompletion,player:{x:Math.round(scene.player.x),y:Math.round(scene.player.y),vx:Math.round(scene.player.body.velocity.x),vy:Math.round(scene.player.body.velocity.y),grounded:!!(scene.player.body.blocked.down||scene.player.body.touching.down),width:scene.player.body.width,height:scene.player.body.height,lives:scene.lives,score:scene.score,checkpoint:scene.checkpointX},platforms:{definitions:scene.level?.platforms,static:active(scene.platforms).length,moving:coords(scene.movingPlatforms),crumbles:coords(scene.crumblePlatforms),breakables:coords(scene.breakables)},enemies:active(scene.enemies).map(enemy=>({x:Math.round(enemy.x),y:Math.round(enemy.y),kind:enemy.getData("kind"),hp:enemy.getData("hp"),vx:Math.round(enemy.body.velocity.x),body:{x:Math.round(enemy.body.x),y:Math.round(enemy.body.y),width:enemy.body.width,height:enemy.body.height,bottomBlocked:enemy.body.blocked.down||enemy.body.touching.down},active:enemy.active})),collectibles:{coins:active(scene.coins).length,hearts:coords(scene.hearts),stars:coords(scene.stars),secrets:coords(scene.secrets)},resonators:coords(scene.resonators),checkpoints:coords(scene.checkpoints),exit:scene.exit?{x:Math.round(scene.exit.x),y:Math.round(scene.exit.y),active:scene.exit.active}:null,boss:scene.boss?.active?{x:Math.round(scene.boss.x),hp:scene.bossHp,phase:scene.bossPhase}:null,savedProgress:readSave()};
+      },
+      setCameraZoom(zoom){const scene=game.scene.getScene("Play");if(!scene?.player?.active)return null;const value=Number(zoom);if(![1,1.15].includes(value))return scene.cameras.main.zoom;scene.cameras.main.setZoom(value);return scene.cameras.main.zoom;},
+      completeChapter(){game.scene.getScene("Play")?.completeLevel()}
+    });
+  }
 
   const releaseAllTouch=()=>Object.keys(TOUCH).forEach(key=>TOUCH[key]=false);
   document.querySelectorAll("#touch-controls button").forEach(buttonEl=>{
