@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auditoría de hojas de personaje · Auralia</title>
+<style>
+  body{max-width:1100px;margin:2rem auto;padding:0 1rem;background:#11182b;color:#f8edcf;font:15px/1.5 system-ui}
+  table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #59627a;padding:.4rem;text-align:left}
+  code,pre{color:#cde7ff}pre{white-space:pre-wrap}.contact{width:min(100%,1024px);image-rendering:pixelated}
+</style>
+<h1>Auditoría de hojas de personajes</h1>
+<p>Comprobación por navegador de alfa, encuadre, bordes y diferencias entre cuadros. La hoja fuente no se altera.</p>
+<pre id="result">Analizando imágenes…</pre>
+<div id="contacts"></div>
+<script>
+"use strict";
+const labels={
+ andres:["reposo","reposo similar","paso A","paso B","carrera 1","carrera 2","carrera 3","carrera 4","espada arriba","corte","daño","victoria"],
+ vannesa:["reposo","parpadeo","postura erguida","paso","carrera 1","carrera 2","carrera 3","carrera 4","arco de energía","orbe","daño","victoria"]
+};
+function load(src){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=src})}
+function analyze(image){
+ const canvas=document.createElement("canvas");canvas.width=1024;canvas.height=684;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(image,0,0);const data=ctx.getImageData(0,0,1024,684).data,frames=[];
+ for(let index=0;index<12;index++){
+  const col=index%4,row=Math.floor(index/4),x0=col*256,y0=row*228;let minX=256,minY=228,maxX=-1,maxY=-1,visible=0,edge=0;
+  for(let y=0;y<228;y++)for(let x=0;x<256;x++){const a=data[((y0+y)*1024+x0+x)*4+3];if(a>8){visible++;minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);if(x<2||x>253||y<2||y>225)edge++}}
+  frames.push({index,label:labels[image.dataset.role][index],alphaPixels:visible,bounds:visible?[minX,minY,maxX,maxY].join(", "):"vacío",nonTransparentNearCellEdge:edge});
+ }
+ const differences=[];
+ for(let i=0;i<12;i++)for(let j=i+1;j<12;j++){
+  const ai=i%4,ar=Math.floor(i/4),bi=j%4,br=Math.floor(j/4);let changed=0,compared=0;
+  for(let y=0;y<228;y++)for(let x=0;x<256;x++)for(let c=0;c<4;c++){const a=data[((ar*228+y)*1024+ai*256+x)*4+c],b=data[((br*228+y)*1024+bi*256+x)*4+c];if(a!==b)changed++;compared++}
+  differences.push({frames:i+"-"+j,pixelChannelDifferencePercent:Number(changed/compared*100).toFixed(2)});
+ }
+ return {canvas,frames,differences:differences.filter(v=>Number(v.pixelChannelDifferencePercent)<8)};
+}
+(async()=>{
+ const results=[];
+ for(const role of ["andres","vannesa"]){
+  const image=await load("/assets/characters/"+role+"-gameplay-sheet.png");image.dataset.role=role;
+  const audited=analyze(image),preview=document.createElement("figure"),caption=document.createElement("figcaption");
+  preview.append(audited.canvas);audited.canvas.className="contact";caption.textContent=role==="andres"?"ANDRÉS · cuadros numerados 0–11":"VANNESA · cuadros numerados 0–11";preview.prepend(caption);document.querySelector("#contacts").append(preview);
+  results.push({role,dimensions:[image.naturalWidth,image.naturalHeight],frames:audited.frames,visuallySimilarPairs:audited.differences});
+ }
+ document.querySelector("#result").textContent=JSON.stringify(results,null,2);
+})().catch(error=>document.querySelector("#result").textContent="Error: "+error.message);
+</script>
+</html>

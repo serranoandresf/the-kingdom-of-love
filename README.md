@@ -50,6 +50,7 @@ El proyecto está preparado para **GitHub Pages con GitHub Actions**. Sigue `PUB
 - `src/config.js`: personalización.
 - `src/data.js`: mundos y diseño de quince niveles.
 - `src/art.js`: sprites pixel-art procedurales.
+- `assets/worlds/valle-capitulo-1-tileset.svg`: tileset de 24 cuadros integrado en las plataformas y el suelo del primer capítulo.
 - `src/game.js`: escenas, física, combate, resonancia y progreso.
 - `src/pwa.js` / `sw.js`: instalación opcional y caché.
 - `assets/worlds/`: arte ambiental original.
@@ -58,3 +59,5 @@ El proyecto está preparado para **GitHub Pages con GitHub Actions**. Sigue `PUB
 ## Estado de calidad
 
 La estructura, los datos y la sintaxis pueden validarse automáticamente con `node tools/validate_project.cjs`. Eso no sustituye una prueba visual completa con Phaser ni pruebas físicas en Android/iPhone. La versión actual representa una evolución jugable y una primera vertical slice de la dirección Auralia; no debe presentarse todavía como lanzamiento comercial final.
+
+La reconstrucción definitiva empezó en la rama `remaster/auralia-definitive`. Consulta `AUDITORIA_PRODUCCION_AURALIA.md` para conocer qué recursos son finales y cuáles siguen provisionales. El capítulo 1 ya tiene un tileset propio y ciclos Phaser de caminar/correr; falta completar las animaciones, los capítulos restantes y la prueba real de recorrido.

@@ -19,3 +19,11 @@ canvas{display:block;max-width:100%;max-height:100%;image-rendering:pixelated;to
 @media(max-height:440px){.touch-pad button{width:42px;height:42px}.touch-pad-right{grid-template-columns:repeat(2,44px);grid-template-rows:repeat(2,44px);gap:5px}.touch-pad-right button{width:44px;height:44px}#touch-controls{inset-bottom:max(6px,env(safe-area-inset-bottom))}}
 @media(orientation:landscape) and (pointer:coarse){#game-shell{width:100vw;height:100dvh}.touch-pad button{width:52px;height:52px}.touch-pad-right{grid-template-columns:repeat(2,52px);grid-template-rows:repeat(2,52px)}.touch-pad-right button{width:52px;height:52px}}
 @media(max-width:380px){.touch-pad button{width:43px;height:43px}.touch-pad-right{grid-template-columns:repeat(2,44px);grid-template-rows:repeat(2,44px);gap:4px}.touch-pad-right button{width:44px;height:44px}.touch-pad{gap:6px}}
+
+
+/* AURALIA DEFINITIVE REMASTER V2 — refined presentation */
+#game-shell{border:1px solid rgba(226,186,104,.72);border-radius:10px;background:radial-gradient(ellipse at 50% 10%,#24385a 0%,#11182b 72%);box-shadow:0 22px 80px #000b,inset 0 0 0 3px rgba(255,227,164,.06),inset 0 0 36px rgba(10,15,30,.45)}
+#game{background:linear-gradient(135deg,rgba(241,199,119,.035),transparent 28%,rgba(99,122,185,.035) 72%,transparent)}
+.touch-pad button{border:1px solid rgba(255,226,164,.92);background:linear-gradient(145deg,rgba(35,61,100,.94),rgba(13,27,51,.93));color:#fff2d1;text-shadow:0 1px 3px #111;box-shadow:0 5px 18px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 2px rgba(213,170,93,.12);backdrop-filter:blur(5px)}
+.touch-pad button:active,.touch-pad button.is-pressed{background:linear-gradient(145deg,#f2d18a,#c48a3a);color:#211a2d;box-shadow:0 2px 8px #0008,inset 0 1px 0 #fff7d8}
+@media(prefers-reduced-motion:reduce){.touch-pad button{transition:none!important}}

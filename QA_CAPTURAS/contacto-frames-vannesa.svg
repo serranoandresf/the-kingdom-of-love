@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="760" viewBox="0 0 1024 760">
+  <rect width="1024" height="760" fill="#11182b"/>
+  <text x="24" y="27" fill="#fff0c4" font-family="sans-serif" font-size="20" font-weight="700">VANNESA · HOJA DE REFERENCIA · 4 × 3 · 256 × 228 px</text>
+  <image href="../assets/characters/vannesa-gameplay-sheet.png" x="0" y="40" width="1024" height="684"/>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff4dc">
+    <g><rect x="4" y="44" width="168" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="10" y="59">00 · reposo</text></g>
+    <g><rect x="260" y="44" width="170" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="266" y="59">01 · parpadeo</text></g>
+    <g><rect x="516" y="44" width="180" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="522" y="59">02 · postura erguida</text></g>
+    <g><rect x="772" y="44" width="120" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="778" y="59">03 · paso</text></g>
+    <g><rect x="4" y="272" width="138" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="10" y="287">04 · carrera 1</text></g>
+    <g><rect x="260" y="272" width="138" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="266" y="287">05 · carrera 2</text></g>
+    <g><rect x="516" y="272" width="138" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="522" y="287">06 · carrera 3</text></g>
+    <g><rect x="772" y="272" width="138" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="778" y="287">07 · carrera 4</text></g>
+    <g><rect x="4" y="500" width="214" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="10" y="515">08 · arco de energía</text></g>
+    <g><rect x="260" y="500" width="205" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="266" y="515">09 · orbe al borde</text></g>
+    <g><rect x="516" y="500" width="126" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="522" y="515">10 · daño</text></g>
+    <g><rect x="772" y="500" width="138" height="22" rx="3" fill="#101629" fill-opacity=".88"/><text x="778" y="515">11 · victoria</text></g>
+  </g>
+  <g id="audit-edge-warning" fill="none" stroke="#ff5364" stroke-width="3" stroke-dasharray="9 6"><rect x="256" y="496" width="256" height="228"/><rect x="512" y="496" width="256" height="228"/><path d="M512 496V724" stroke-width="5"/></g>
+  <rect x="0" y="724" width="1024" height="36" fill="#11182b"/><text x="24" y="749" fill="#ff9ca5" font-family="sans-serif" font-size="15" font-weight="700">Borde rojo: cuadros 09→10 alcanzan ambos lados de la celda; rehacer el efecto sin recorte automático.</text>
+</svg>
