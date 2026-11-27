@@ -3,76 +3,91 @@
 **Actualizado:** 27 de noviembre de 2026.
 **Repositorio:** `serranoandresf/the-kingdom-of-love`.
 **Rama de trabajo:** `remaster/valle-verde-production`.
-**Commit remoto verificado:** `a02bc7da767b5e2ca4ef693d832d9a503e7f2e84`.
-**Base de `main` verificada:** `0a510c8d15b1090e5edf07077f16ea51603a761c`.
+**Ultimo commit remoto confirmado antes de esta actualizacion:** `a7219a569a7e427551cc4a0b0fd9d23c69efca50`.
+**Base de `main`:** `0a510c8d15b1090e5edf07077f16ea51603a761c`.
+**Comparacion remota antes de esta actualizacion:** 3 commits por delante y 0 por detras de `main`.
 **URL de GitHub Pages conservada:** `https://serranoandresf.github.io/the-kingdom-of-love/`.
 
 ## Estado de GitHub
 
-- GitHub confirma que `remaster/valle-verde-production` existe y contiene el commit `a02bc7d`.
-- Comparacion remota: la rama de trabajo esta 2 commits por delante y 0 commits por detras de `main`.
+- La rama `remaster/valle-verde-production` existe en GitHub.
+- El ultimo commit remoto verificado es `a7219a569a7e427551cc4a0b0fd9d23c69efca50`.
 - Commit `2e81c07`: incorpora la biblia del juego y los documentos de produccion.
 - Commit `a02bc7d`: corrige la altura de origen del proyectil de VANNESA.
-- `main` permanece en el commit base `0a510c8` en la ultima comparacion verificada.
-- No se ha fusionado esta rama ni se ha publicado este cambio en GitHub Pages.
-- El ultimo `git status --short` local estuvo limpio despues del push.
+- Commit `a7219a5`: registra las pruebas de combate individuales de ambos protagonistas.
+- `main` permanece en `0a510c8d15b1090e5edf07077f16ea51603a761c` en la ultima comparacion remota.
+- La rama de trabajo no se ha fusionado y estos cambios no se han desplegado en GitHub Pages.
+- La ultima verificacion local despues del push de `a7219a5` mostro un arbol de trabajo limpio.
 
 ## Identidad y alcance del producto
 
-VALLE VERDE es la identidad definida por el Master Production Prompt. La documentacion maestra esta versionada en `docs/`, pero la migracion completa de la identidad visible, interfaz, portada, recursos y mundos a la vision de Medellin sigue pendiente. No asumir que el juego publicado ya refleja el nuevo producto.
+VALLE VERDE es la identidad definida por el Master Production Prompt. La documentacion maestra esta versionada en `docs/`, pero la migracion completa de la identidad visible, interfaz, portada, recursos, personajes y mundos a la vision de Medellin sigue pendiente. No asumir que el juego publicado ya refleja el nuevo producto.
 
 El objetivo funcional incluye 5 mundos, 15 capitulos y 5 guardianes. La existencia de datos/configuracion para esas cantidades no demuestra que cada capitulo este terminado ni que todos los jefes puedan derrotarse.
 
 ## Pruebas reales de navegador - 27 de noviembre de 2026
 
-Las siguientes pruebas locales utilizaron navegador Edge con Phaser y renderizado WebGL. Los informes JSON y capturas se guardaron en `%LOCALAPPDATA%\AuraliaQA\reports`.
+Las pruebas automatizadas de navegador se ejecutaron localmente en Edge con Phaser y renderizado WebGL. Los informes JSON y capturas se guardaron en `%LOCALAPPDATA%\AuraliaQA\reports`.
+
+### Combate individual
 
 | Prueba | Resultado | Evidencia |
 |---|---|---|
-| Combate cuerpo a cuerpo de ANDRES | PASS | `VALLE_VERDE_PRUEBA_COMBATE_ANDRES_V3.cjs`; estado `ANDRES_MELEE_KILL_CONFIRMED` |
-| Proyectil de VANNESA despues del ajuste de altura | PASS | `VALLE_VERDE_PRUEBA_COMBATE_VANNESA_V4.cjs`; estado `VANNESA_PROJECTILE_KILL_CONFIRMED` |
-| Sintaxis de `src/game.js` | PASS | `node --check` sin errores |
-| Formato del diff | PASS | `git diff --check` sin errores |
-| Validador automatizado del proyecto | PASS | `tools/validate_project.cjs` devolvio `result: PASS` |
+| Ataque cuerpo a cuerpo de ANDRES | PASS | `VALLE_VERDE_PRUEBA_COMBATE_ANDRES_V3.cjs`; `ANDRES_MELEE_KILL_CONFIRMED` |
+| Proyectil de VANNESA | PASS | `VALLE_VERDE_PRUEBA_COMBATE_VANNESA_V4.cjs`; `VANNESA_PROJECTILE_KILL_CONFIRMED` |
+| Diagnostico controlado de ambos ataques | PASS | `VALLE_VERDE_DIAGNOSTICO_COMBATE_V3.cjs`; `ENEMY_KILL_CONFIRMED` para ambos protagonistas |
 
-### Detalle de combate ANDRES
+### Recorrido completo del Capitulo 1 - V2
 
-- Se cargo el juego en WebGL; tileset, hoja de ANDRES, hoja de VANNESA y musica del capitulo cargaron.
-- Un ataque cuerpo a cuerpo alcanzo al slime: vida del enemigo de 1 a 0 y destruccion confirmada.
-- ANDRES termino con 3 vidas; no se observo Game Over.
-- Cero errores de consola, errores de pagina o solicitudes fallidas.
+Informe principal: `valle-verde-ch1-full-playthrough-v2-2026-11-27T14-14-45-096Z.json`.
+Estado general: `BOTH_CHARACTERS_CHAPTER1_PASS`.
 
-### Detalle de combate VANNESA
+| Criterio | ANDRES | VANNESA |
+|---|---:|---:|
+| WebGL y recursos | PASS | PASS |
+| Aterrizaje en primera plataforma | PASS | PASS |
+| Derroto al menos un enemigo durante el recorrido | PASS | PASS |
+| Cuatro slimes derrotados | 4 de 4 | 3 de 4 (objetivo opcional) |
+| Checkpoint X=1200 | PASS | PASS |
+| Checkpoint X=2180 | PASS | PASS |
+| Transicion a Intermission / capitulo 2 | PASS | PASS |
+| Progreso guardado en nivel 1 | PASS | PASS |
+| Supervivencia al completar | 3 vidas | 3 vidas |
+| Errores de consola, pagina o solicitudes | 0 | 0 |
+| Tiempo de esta ejecucion automatizada | 15691 ms | 14967 ms |
 
-- Se cargo el juego en WebGL; tileset, ambas hojas de personaje y musica del capitulo cargaron.
-- Un proyectil alcanzo al slime: vida del enemigo de 1 a 0 y destruccion confirmada.
-- VANNESA termino con 3 vidas; no se observo Game Over.
-- Cero errores de consola, errores de pagina o solicitudes fallidas.
-- La correccion cambio el origen vertical del proyectil de `action.origin.y - 2` a `action.origin.y - 20`. La repeticion V4 confirmo un impacto y una eliminacion.
+Los tiempos anteriores corresponden a la automatizacion y no son una medicion de duracion normal para una persona jugando.
 
-### Otras comprobaciones de movimiento
+ANDRES elimino los cuatro slimes del capitulo. VANNESA elimino tres; eliminar el cuarto se mantiene como objetivo opcional y no bloquea la salida del nivel. Ambos activaron los dos checkpoints y llegaron a `Intermission` con tres vidas. El guardado reporto `level: 1` y el protagonista correspondiente.
 
-- En la prueba independiente anterior, VANNESA aterrizo en la primera plataforma: superficie Y=370, cuerpo apoyado en Y=370 y estado `grounded=true`. Esta evidencia cubre ese primer aterrizaje, no todas las plataformas ni todos los saltos.
-- La prueba de ANDRES sin atacar registro dano por contacto con enemigos. El ataque cuerpo a cuerpo si funciona; por tanto, recibir dano al chocar sin combatir no se clasifica por si solo como defecto de colision. Falta evaluar tutorial, claridad de controles y balance.
+### Correccion de la interpretacion del primer recorrido V1
 
-## Validacion automatizada: alcance y limites
+El primer comprobador V1 no mantenia la entrada de ataque el tiempo suficiente para que la entrada se registrara de forma fiable en todos los casos. Ademas, tras cambiar a `Intermission`, intentaba leer las vidas desde un jugador que ya no estaba activo. Por ello, V1 se conserva como diagnostico historico y no como criterio de aceptacion final. V2 mantiene `F` durante 180 ms y utiliza `lastCompletion`/datos guardados para evaluar la salida de escena.
 
-El validador informo 5 mundos, 15 capitulos, 5 guardianes y 15 resonadores; reviso sintaxis, ensamblaje de escenas con Phaser simulado, elementos PWA, controles tactiles y capturas exportadas. El propio validador advierte que el ensamblaje simulado no equivale a renderizado o jugabilidad real.
+### Comprobaciones tecnicas adicionales
+
+- `node --check src/game.js`: PASS.
+- `git diff --check`: PASS en las modificaciones de codigo y documentacion probadas.
+- `node tools/validate_project.cjs`: PASS, con la limitacion declarada de que el ensamblaje simulado no sustituye pruebas reales.
+- Las pruebas V2 de recorrido completo reportaron cero errores de consola, errores de pagina y solicitudes fallidas.
+- El aterrizaje inicial de ambos personajes se verifico con el cuerpo apoyado sobre la superficie de la primera plataforma, Y=370.
 
 ## Pendiente - no afirmar como completado
 
-- Recorrer y completar los 15 capitulos con ANDRES y con VANNESA (30 recorridos de aceptacion).
-- Validar checkpoints, muerte/respawn, coleccionables, puertas, resonadores, transiciones y guardado en recorridos completos.
-- Probar enemigos de distintos tipos, alturas y velocidades, y confirmar limites/rango del proyectil de VANNESA.
-- Validar los cinco jefes y sus patrones con ambos personajes.
+- Completar y aceptar los 15 capitulos con ambos personajes (30 recorridos de aceptacion).
+- Probar la muerte/respawn, los checkpoints recuperados tras morir, plataformas moviles, bloques rompibles, coleccionables, mecanismos y guardado durante recorridos completos.
+- Validar los cinco jefes, sus fases/patrones y sus derrotas con ambos personajes.
+- Ampliar la matriz de combate con enemigos de distintos tipos, alturas, velocidades y distancias; incluir el enemigo opcional no derrotado por VANNESA en esta ejecucion.
+- Validar el capitulo 1 mediante juego humano/manual, ademas de la automatizacion de navegador.
 - Comprobar la experiencia en un telefono fisico; la emulacion de viewport no reemplaza esta prueba.
 - Repetir regresion de PWA/cache y persistencia despues de cambios importantes.
 - Implementar la identidad visual definitiva, personajes/vestuario, escenarios y geografia de Medellin descritos en la biblia.
-- No fusionar a `main` ni desplegar hasta completar la aceptacion y revisar el resultado visual y jugable.
+- No fusionar a `main` ni desplegar hasta completar la aceptacion de producto, pruebas manuales y revision visual/jugable.
 
 ## Siguiente prioridad
 
-1. Probar el recorrido jugable completo del Capitulo 1 con cada personaje, incluyendo movimiento, primer combate, plataformas, checkpoints y final del nivel.
-2. Corregir cualquier defecto reproducible y ampliar pruebas de combate a enemigos en diferentes posiciones.
+1. Registrar y versionar este resultado de aceptacion de Capitulo 1 para ANDRES y VANNESA.
+2. Hacer una pasada manual del capitulo 1 y una regresion de respawn/checkpoints, sin alterar la evidencia automatizada ya conseguida.
 3. Desarrollar el piloto visual/funcional definitivo del Capitulo 1 bajo la direccion de arte VALLE VERDE.
-4. Actualizar este registro con evidencia real despues de cada hito. Mantener `main` y GitHub Pages intactas hasta la aprobacion final.
+4. Continuar con el capitulo 2 y ampliar la matriz de 30 recorridos de aceptacion.
+5. Mantener `main` y GitHub Pages intactas hasta la aprobacion final.
