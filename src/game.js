@@ -526,7 +526,7 @@
       if(!action||action.impactApplied||!this.player?.active||this.finished)return;
       action.phase="impact";action.impactApplied=true;
       if(this.role==="VANNESA"){
-        const p=this.projectiles.create(action.origin.x+action.origin.facing*24,action.origin.y-2,"magic");this.projectileLaunchCount++;action.projectileCreated=true;p.body.setAllowGravity(false);p.setVelocityX(action.origin.facing*390);p.setTint(0xffc4ff);p.setDepth(8);this.time.delayedCall(1800,()=>{if(p.active)p.destroy()});playTone(620,.09,"sine",.045);
+        const p=this.projectiles.create(action.origin.x+action.origin.facing*24,action.origin.y-20,"magic");this.projectileLaunchCount++;action.projectileCreated=true;p.body.setAllowGravity(false);p.setVelocityX(action.origin.facing*390);p.setTint(0xffc4ff);p.setDepth(8);this.time.delayedCall(1800,()=>{if(p.active)p.destroy()});playTone(620,.09,"sine",.045);
       }else{
         const swing=action.origin;
         this.enemies.children.iterate(e=>{if(e?.active&&Math.abs(e.x-swing.x)<62&&Math.abs(e.y-swing.y)<58)this.killEnemy(e)});
