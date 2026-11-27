@@ -76,7 +76,7 @@
 
   class Boot extends Phaser.Scene{
     constructor(){super("Boot")}
-    preload(){this.load.image("titleCover","assets/concept/title-screen-concept.webp");this.load.image("valleyPanorama","assets/worlds/valle-de-las-campanas.webp");this.load.image("valleyIntroRemaster","assets/worlds/valle-intro-remaster.webp");this.load.spritesheet("valleyProductionTiles","assets/worlds/valle-capitulo-1-tileset.svg",{frameWidth:48,frameHeight:48});this.load.spritesheet("andresGameplaySheet","assets/characters/andres-gameplay-sheet.png",{frameWidth:256,frameHeight:228});this.load.spritesheet("vannesaGameplaySheet","assets/characters/vannesa-gameplay-sheet.png",{frameWidth:256,frameHeight:228});this.load.image("andresPortrait","assets/characters/andres-portrait.webp");this.load.image("vannesaPortrait","assets/characters/vannesa-portrait.webp");for(let i=0;i<5;i++)this.load.audio("auralia_world_"+i,"assets/audio/auralia-world-"+i+".mp3")}
+    preload(){this.load.spritesheet("valleyProductionTiles","assets/worlds/valle-capitulo-1-tileset.svg",{frameWidth:48,frameHeight:48});this.load.spritesheet("andresGameplaySheet","assets/characters/andres-gameplay-sheet.png",{frameWidth:256,frameHeight:228});this.load.spritesheet("vannesaGameplaySheet","assets/characters/vannesa-gameplay-sheet.png",{frameWidth:256,frameHeight:228});for(let i=0;i<5;i++)this.load.audio("auralia_world_"+i,"assets/audio/auralia-world-"+i+".mp3")}
     create(){window.LOVE_GAME_ART.create(this);this.scene.start("Title")}
   }
   class Title extends Phaser.Scene{
@@ -86,22 +86,24 @@
       if(this.textures.exists("titleCover")){this.add.image(W/2,H/2,"titleCover").setDisplaySize(W,H).setDepth(0)}
       else{
         makeBackdrop(this,0,true);addStarField(this,52);
-        this.add.text(W/2,65,CFG.title||"THE KINGDOM OF LOVE",{fontFamily:"Georgia,serif",fontSize:"43px",fontStyle:"bold",color:"#fff0c4",stroke:"#573b32",strokeThickness:7}).setOrigin(.5);
+        this.add.text(W/2,65,CFG.title||"GUATAPÉ",{fontFamily:"Georgia,serif",fontSize:"43px",fontStyle:"bold",color:"#fff0c4",stroke:"#573b32",strokeThickness:7}).setOrigin(.5);
         this.add.text(W/2,115,CFG.subtitle||"ANDRÉS & VANNESA",{fontFamily:"Georgia,serif",fontSize:"22px",fontStyle:"bold",color:"#ffdb83"}).setOrigin(.5);
       }
       const progress=getProgress();
       const newGame=()=>this.scene.start("Select",{level:0,score:0,lives:3});
       const continueGame=()=>this.scene.start("Select",{level:progress.level,score:progress.score,lives:progress.lives,coins:progress.coins,hearts:progress.hearts,fragments:progress.fragments,continue:true});
       const menuItems=[
-        {x:730,y:254,w:230,h:47,run:newGame},
-        {x:730,y:300,w:210,h:43,run:continueGame},
-        {x:730,y:341,w:210,h:42,run:()=>this.scene.start("Options")},
-        {x:730,y:381,w:210,h:42,run:()=>this.scene.start("Achievements")},
-        {x:730,y:420,w:210,h:42,run:()=>this.scene.start("Credits")},
-        {x:730,y:460,w:210,h:42,run:()=>showToast(this,"GRACIAS POR VISITAR AURALIA. PUEDES CERRAR ESTA PESTAÑA PARA SALIR.")}
+        {x:730,y:254,w:230,h:47,label:"NUEVA PARTIDA",run:newGame},
+        {x:730,y:300,w:210,h:43,label:"CONTINUAR",run:continueGame},
+        {x:730,y:341,w:210,h:42,label:"OPCIONES",run:()=>this.scene.start("Options")},
+        {x:730,y:381,w:210,h:42,label:"CRÓNICAS",run:()=>this.scene.start("Achievements")},
+        {x:730,y:420,w:210,h:42,label:"CRÉDITOS",run:()=>this.scene.start("Credits")},
+        {x:730,y:460,w:210,h:42,label:"SALIR",run:()=>showToast(this,"GRACIAS POR VISITAR GUATAPÉ. PUEDES CERRAR ESTA PESTAÑA PARA SALIR.")}
       ];
       menuItems.forEach(item=>{
-        const hit=this.add.rectangle(item.x,item.y,item.w,item.h,0xffffff,0).setDepth(6).setInteractive({useHandCursor:true});
+        this.add.rectangle(item.x,item.y,item.w,item.h,0x173b3c,.90).setStrokeStyle(2,0xd6b46a,.95).setDepth(5);
+        this.add.text(item.x,item.y,item.label,{fontFamily:"Georgia,serif",fontSize:"16px",fontStyle:"bold",color:"#fff1d0"}).setOrigin(.5).setDepth(6);
+        const hit=this.add.rectangle(item.x,item.y,item.w,item.h,0xffffff,0).setDepth(7).setInteractive({useHandCursor:true});
         hit.on("pointerover",()=>hit.setFillStyle(0xffedc6,.075));
         hit.on("pointerout",()=>hit.setFillStyle(0xffffff,0));
         hit.on("pointerdown",item.run);
@@ -122,14 +124,14 @@
       this.add.circle(285,235,79,0xe9c477,.14);
       if(this.textures.exists("andresPortrait")){this.add.image(285,235,"andresPortrait").setDisplaySize(146,146).setDepth(3);this.add.rectangle(285,235,154,154,0xffffff,0).setStrokeStyle(3,0xe8c16b).setDepth(4)}else this.add.image(285,235,"andres_idle").setScale(1.575);
       this.add.text(285,345,"ANDRÉS",{fontFamily:"Georgia,serif",fontSize:"27px",fontStyle:"bold",color:"#ffdc83"}).setOrigin(.5);
-      this.add.text(285,385,"ESPADA · FUERZA · ROMPE BLOQUES\nAtaque cercano poderoso.",{fontSize:"15px",color:"#f7f1df",align:"center",lineSpacing:7}).setOrigin(.5);
+      this.add.text(285,385,"PRÍNCIPE CABALLERO · ESPADA · PULSO DORADO\nAtaque cercano y fuerza de caballero.",{fontSize:"15px",color:"#f7f1df",align:"center",lineSpacing:7}).setOrigin(.5);
       button(this,285,465,"JUGAR COMO ANDRÉS",()=>this.begin("ANDRES"),{width:270,fill:0x8e4d55,fontSize:"16px"});
       // Vannesa card
       this.add.rectangle(675,285,330,310,0x332746,.88).setStrokeStyle(3,0xf0bad2);
       this.add.circle(675,235,79,0xf0bad2,.14);
       if(this.textures.exists("vannesaPortrait")){this.add.image(675,235,"vannesaPortrait").setDisplaySize(146,146).setDepth(3);this.add.rectangle(675,235,154,154,0xffffff,0).setStrokeStyle(3,0xf0bad2).setDepth(4)}else this.add.image(675,235,"vannesa_idle").setScale(1.575);
       this.add.text(675,345,"VANNESA",{fontFamily:"Georgia,serif",fontSize:"27px",fontStyle:"bold",color:"#ffc4df"}).setOrigin(.5);
-      this.add.text(675,385,"MAGIA · AGILIDAD · DOBLE SALTO\nProyectiles mágicos a distancia.",{fontSize:"15px",color:"#f7f1df",align:"center",lineSpacing:7}).setOrigin(.5);
+      this.add.text(675,385,"PRINCESA · RESONANCIA AZUL · DOBLE SALTO\nProyectiles rúnicos y magia a distancia.",{fontSize:"15px",color:"#f7f1df",align:"center",lineSpacing:7}).setOrigin(.5);
       button(this,675,465,"JUGAR COMO VANNESA",()=>this.begin("VANNESA"),{width:280,fill:0x774c91,fontSize:"16px"});
       button(this,W/2,520,"VOLVER",()=>this.scene.start("Title"),{width:150,height:34,fontSize:"14px",fill:0x263653});
     }
@@ -145,18 +147,18 @@
       this.add.rectangle(W/2,H/2,W,H,0x111629,.30);
       const moon=this.add.circle(760,128,88,0xf3dca2,.12);this.tweens.add({targets:moon,scale:1.12,alpha:.05,duration:2200,yoyo:true,repeat:-1});
       for(let i=0;i<50;i++){const x=Phaser.Math.Between(0,W),y=Phaser.Math.Between(0,H);const p=this.add.circle(x,y,Phaser.Math.Between(1,3),0xffe8b5,.45);this.tweens.add({targets:p,alpha:.08,duration:900+Math.random()*1500,yoyo:true,repeat:-1})}
-      this.add.text(W/2,66,"PRÓLOGO · AURALIA",{fontFamily:"Georgia,serif",fontSize:"18px",fontStyle:"bold",color:"#eacb83",letterSpacing:4}).setOrigin(.5);
+      this.add.text(W/2,66,"PRÓLOGO · GUATAPÉ",{fontFamily:"Georgia,serif",fontSize:"18px",fontStyle:"bold",color:"#eacb83",letterSpacing:4}).setOrigin(.5);
       const tower=this.add.image(W/2,225,"resonator").setScale(4.6);this.tweens.add({targets:tower,angle:{from:-2,to:2},duration:1800,yoyo:true,repeat:-1});
-      this.add.text(W/2,330,"LA CAMPANA DEL ALBA",{fontFamily:"Georgia,serif",fontSize:"31px",fontStyle:"bold",color:"#fff0c8",stroke:"#2d2037",strokeThickness:5}).setOrigin(.5);
+      this.add.text(W/2,330,"EL JURAMENTO DEL EMBALSE",{fontFamily:"Georgia,serif",fontSize:"31px",fontStyle:"bold",color:"#fff0c8",stroke:"#2d2037",strokeThickness:5}).setOrigin(.5);
       this.storyText=this.add.text(W/2,390,"",{fontSize:"18px",color:"#f7edda",align:"center",wordWrap:{width:760},lineSpacing:8}).setOrigin(.5);
       this.pageText=this.add.text(W/2,452,"",{fontSize:"12px",color:"#e2c98c"}).setOrigin(.5);
       button(this,735,505,"SIGUIENTE",()=>this.nextPage(),{width:190,height:42,fontSize:"15px"});
       button(this,225,505,"SALTAR INTRO",()=>this.startGame(),{width:190,height:42,fontSize:"14px",fill:0x34435f});
       this.pages=[
-        "En Auralia, cinco regiones vivían en armonía gracias a la Campana del Alba. Cada nota mantenía despiertos los ríos, los bosques, las mareas y las auroras.",
-        "Una noche, el Afinador del Silencio quebró su cristal en cinco fragmentos. El sonido desapareció y los caminos del reino comenzaron a separarse.",
-        `${roleLabel(this.d.role)} escuchó un eco entre las ruinas. Andrés y Vannesa emprendieron rutas distintas, pero una misma resonancia comenzó a guiarlos.`,
-        "Tu viaje comienza en el Valle de las Campanas. Encuentra los resonadores, recupera las cinco notas y descubre por qué dos caminos pueden formar una sola canción."
+        "En GUATAPÉ, el Pueblo de los Zócalos guarda en sus relieves la memoria de familias, oficios y caminos. Entre montañas y aguas, cada fachada cuenta una historia.",
+        "El embalse refleja las islas y la gran roca que domina el horizonte. En esta leyenda fantástica, cinco sellos rúnicos mantienen el equilibrio entre el pueblo, los muelles y las aguas.",
+        `${roleLabel(this.d.role)} responde al llamado: ANDRÉS, Príncipe Caballero, y VANNESA, Princesa del reino, emprenden la búsqueda. El Afinador del Silencio quiere apagar los recuerdos que viven en los zócalos y las aguas.`,
+        "Tu viaje comienza en las calles empedradas. Cruza el malecón, descubre las islas y asciende a la Roca del Vigía. Recupera las cinco notas y devuelve la memoria a GUATAPÉ."
       ];
       this.renderPage();this.input.keyboard.on("keydown-ENTER",()=>this.nextPage());
     }
@@ -207,13 +209,13 @@
     create(){
       makeBackdrop(this,4,false);addStarField(this,38);
       this.add.rectangle(W/2,H/2,W,H,0x101629,.74);
-      this.add.text(W/2,58,"CRÓNICA DE AURALIA",{fontFamily:"Georgia,serif",fontSize:"34px",fontStyle:"bold",color:"#ffdf91",stroke:"#342943",strokeThickness:4}).setOrigin(.5);
+      this.add.text(W/2,58,"CRÓNICA DE GUATAPÉ",{fontFamily:"Georgia,serif",fontSize:"34px",fontStyle:"bold",color:"#ffdf91",stroke:"#342943",strokeThickness:4}).setOrigin(.5);
       this.add.text(W/2,94,"Cada nota recuperada deja una huella en el reino",{fontSize:"15px",color:"#e8dfca"}).setOrigin(.5);
       const p=getProgress();
       const entries=[
-        {title:"EL PRIMER ECO",desc:"Recupera tu primer fragmento de la Campana del Alba.",done:p.fragments>=1},
-        {title:"LAS CINCO NOTAS",desc:"Reúne los cinco fragmentos y restaura la armonía.",done:p.fragments>=5},
-        {title:"VIAJERO DE AURALIA",desc:"Alcanza el sexto capítulo de la aventura.",done:p.level>=5},
+        {title:"EL PRIMER ECO",desc:"Recupera el primer sello rúnico del Pueblo de los Zócalos.",done:p.fragments>=1},
+        {title:"LAS CINCO NOTAS",desc:"Reúne los cinco sellos y devuelve la memoria a GUATAPÉ.",done:p.fragments>=5},
+        {title:"VIAJERO DE GUATAPÉ",desc:"Alcanza el sexto capítulo de la aventura.",done:p.level>=5},
         {title:"TESOROS DEL REINO",desc:"Reúne al menos 25 monedas durante tu viaje.",done:p.coins>=25},
         {title:"HÉROE DE LEYENDA",desc:"Consigue una puntuación acumulada de 10.000 puntos.",done:p.score>=10000}
       ];
@@ -225,7 +227,7 @@
         this.add.text(195,y+13,entry.desc,{fontSize:"12px",color:"#e3e5ec"}).setOrigin(0,.5);
         this.add.text(800,y,entry.done?"DESBLOQUEADO":"POR DESCUBRIR",{fontSize:"10px",fontStyle:"bold",color:entry.done?"#f3d58d":"#9da7bb"}).setOrigin(1,.5);
       });
-      this.add.text(W/2,472,"FRAGMENTOS: "+p.fragments+"/5     MONEDAS: "+p.coins+"     PUNTOS: "+p.score,{fontSize:"13px",fontStyle:"bold",color:"#f5dca7"}).setOrigin(.5);
+      this.add.text(W/2,472,"SELLOS RÚNICOS: "+p.fragments+"/5     MONEDAS: "+p.coins+"     PUNTOS: "+p.score,{fontSize:"13px",fontStyle:"bold",color:"#f5dca7"}).setOrigin(.5);
       button(this,W/2,515,"VOLVER AL REINO",()=>this.scene.start("Title"),{width:230,height:36,fontSize:"15px"});
     }
   }
@@ -660,7 +662,7 @@
       this.add.text(W/2,180,world.name+"\n"+world.short+" · NIVEL "+(level.stage+1),{fontSize:"22px",color:"#fff",align:"center",lineSpacing:8}).setOrigin(.5);
       this.add.text(W/2,245,level.story||world.intro,{fontSize:"16px",color:"#f7e9ce",align:"center",wordWrap:{width:700}}).setOrigin(.5);
       this.add.image(420,320,d.role==="VANNESA"?"vannesa_idle":"andres_idle").setScale(1.15);this.add.image(525,320,d.role==="VANNESA"?"andres_idle":"vannesa_idle").setScale(1.15);
-      this.add.text(W/2,405,`Puntos: ${d.score}    Vidas: ${d.lives}    Monedas: ${d.coins}    Corazones: ${d.hearts}    Fragmentos: ${d.fragments||0}/5`,{fontSize:"18px",color:"#fff1ce"}).setOrigin(.5);
+      this.add.text(W/2,405,`Puntos: ${d.score}    Vidas: ${d.lives}    Monedas: ${d.coins}    Corazones: ${d.hearts}    Sellos rúnicos: ${d.fragments||0}/5`,{fontSize:"18px",color:"#fff1ce"}).setOrigin(.5);
       button(this,340,475,"SIGUIENTE NIVEL",()=>this.scene.start("Play",{level:d.next,role:d.role,score:d.score,lives:d.lives,coins:d.coins,hearts:d.hearts,fragments:d.fragments}),{width:260});
       button(this,650,475,"CAMBIAR PROTAGONISTA",()=>this.scene.start("Select",{level:d.next,score:d.score,lives:d.lives,coins:d.coins,hearts:d.hearts,fragments:d.fragments}),{width:240,fill:0x754b83,fontSize:"16px"});
     }

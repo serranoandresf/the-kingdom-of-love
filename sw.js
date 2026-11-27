@@ -1,11 +1,11 @@
-/* THE KINGDOM OF LOVE — PWA cache. Bump CACHE_VERSION when shipping a new release. */
-const CACHE_VERSION = "kol-auralia-definitive-ch1-20261124-10";
+/* GUATAPÉ — PWA cache. Bump CACHE_VERSION when shipping a new release. */
+const CACHE_VERSION = "kol-guatape-prealpha-20261127-01";
 const CORE_CACHE = `${CACHE_VERSION}-core`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const CORE_FILES = [
   "./", "./index.html", "./style.css", "./manifest.webmanifest",
   "./src/config.js", "./src/data.js", "./src/art.js", "./src/auralia-remaster.js", "./src/auralia-remaster-v2.js", "./src/game.js", "./src/pwa.js",
-  "./assets/concept/title-screen-concept.webp", "./assets/worlds/valle-de-las-campanas.webp", "./assets/worlds/valle-intro-remaster.webp", "./assets/worlds/valle-capitulo-1-tileset.svg", "./assets/characters/andres-gameplay-sheet.png", "./assets/characters/vannesa-gameplay-sheet.png", "./assets/characters/andres-portrait.webp", "./assets/characters/vannesa-portrait.webp", "./assets/share/og-cover.jpg", "./assets/share/auralia-remaster-promo.jpg",
+  "./assets/worlds/valle-capitulo-1-tileset.svg", "./assets/characters/andres-gameplay-sheet.png", "./assets/characters/vannesa-gameplay-sheet.png", "./assets/share/og-cover.jpg", "./assets/share/auralia-remaster-promo.jpg",
   "./assets/audio/auralia-world-0.mp3", "./assets/audio/auralia-world-1.mp3", "./assets/audio/auralia-world-2.mp3", "./assets/audio/auralia-world-3.mp3", "./assets/audio/auralia-world-4.mp3",
   "./assets/icons/icon-192.png", "./assets/icons/icon-512.png", "./assets/icons/apple-touch-icon.png"
 ];

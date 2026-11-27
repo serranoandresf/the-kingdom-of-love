@@ -25,8 +25,8 @@ vm.runInNewContext(fs.readFileSync(path.join(root, 'src/data.js'), 'utf8'), cont
 const { worlds, levels } = context.window.LOVE_GAME_DATA;
 if (worlds.length !== 5) throw new Error(`Se esperaban 5 mundos; hay ${worlds.length}`);
 if (levels.length !== 15) throw new Error(`Se esperaban 15 capÃ­tulos; hay ${levels.length}`);
-const expectedWorlds = ['VALLE DE LAS CAMPANAS','BOSQUE DE LAS LUCIÃ‰RNAGAS','MAR DE VIDRIO','CUMBRES DEL INVIERNO AZUL','CIUDAD DEL ECLIPSE'];
-if (worlds.length !== 5 || worlds.some(world => typeof world.name !== "string" || !world.name.trim())) throw new Error("Faltan nombres de mundos válidos");
+const expectedWorlds = ['EL PUEBLO DE LOS ZÓCALOS','EL MALECÓN DE LAS MIL VELAS','LAS ISLAS DEL EMBALSE','LOS CAMINOS DE ARRIERÍA','LA ROCA DEL VIGÍA'];
+if (worlds.length !== 5 || worlds.some((world, i) => world.name !== expectedWorlds[i])) throw new Error("Los cinco mundos no corresponden a la identidad GUATAPÉ");
 const issues = [];
 for (const [i, level] of levels.entries()) {
   const prefix = `CapÃ­tulo ${i + 1}:`;
@@ -53,10 +53,10 @@ for (const ref of [...html.matchAll(/(?:src|href)="\.\/([^"]+)"/g)].map(m => m[1
   if (!fs.existsSync(path.join(root, ref))) throw new Error(`Recurso local del HTML no encontrado: ${ref}`);
 }
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-for (const asset of ['index.html','style.css','src/game.js','assets/share/og-cover.jpg','assets/concept/title-screen-concept.webp','assets/worlds/valle-de-las-campanas.webp','assets/worlds/valle-capitulo-1-tileset.svg']) {
+for (const asset of ['index.html','style.css','src/game.js','assets/share/og-cover.jpg','assets/worlds/valle-capitulo-1-tileset.svg']) {
   if (!sw.includes(`"./${asset}"`)) throw new Error(`El Service Worker no precarga: ${asset}`);
 }
-if (!sw.includes('kol-auralia-definitive-ch1-')) throw new Error('La caché no fue versionada para el capítulo 1 definitivo');
+if (!sw.includes('kol-guatape-prealpha-')) throw new Error('La caché no fue versionada para el capítulo 1 definitivo');
 for (const asset of ['assets/characters/andres-gameplay-sheet.png','assets/characters/vannesa-gameplay-sheet.png']) {
   if (!sw.includes('"./' + asset + '"')) throw new Error('El Service Worker no precarga: ' + asset);
   const png = fs.readFileSync(path.join(root,asset));

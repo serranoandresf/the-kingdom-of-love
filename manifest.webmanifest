@@ -1,15 +1,15 @@
 {
   "id": "./",
-  "name": "THE KINGDOM OF LOVE — ANDRÉS & VANNESA",
-  "short_name": "Kingdom of Love",
-  "description": "Auralia: la canción de dos luces. Cinco regiones, quince capítulos y dos protagonistas.",
+  "name": "GUATAPÉ — ANDRÉS & VANNESA",
+  "short_name": "GUATAPÉ",
+  "description": "Aventura fantástica en GUATAPÉ: zócalos, embalse, islas y la Roca del Vigía.",
   "lang": "es",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#11182b",
-  "theme_color": "#11182b",
+  "background_color": "#1d3d42",
+  "theme_color": "#1d3d42",
   "categories": [
     "games",
     "entertainment"

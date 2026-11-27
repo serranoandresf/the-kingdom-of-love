@@ -1,29 +1,29 @@
-# VALLE VERDE - Estado de produccion
+# GUATAPÉ - Estado de produccion
 
 **Actualizado:** 27 de noviembre de 2026.
 **Repositorio:** `serranoandresf/the-kingdom-of-love`.
 **Rama de trabajo:** `remaster/valle-verde-production`.
-**Ultimo commit remoto verificado:** `b81a88e0a62c4712c5a823b5ebe7419c88b83ba5`.
+**Ultimo commit remoto base antes de migracion GUATAPE:** `21800ff59f206121c17e61ac9d89c2f20f2f33fa`.
 **Base de `main`:** `0a510c8d15b1090e5edf07077f16ea51603a761c`.
-**Comparacion remota verificada:** 4 commits por delante y 0 por detras de `main`.
+**Comparacion remota antes de migracion:** 5 commits por delante y 0 por detras de `main`.
 **URL de GitHub Pages conservada:** `https://serranoandresf.github.io/the-kingdom-of-love/`.
 
 ## Estado de GitHub
 
 - La rama `remaster/valle-verde-production` existe en GitHub.
-- El ultimo commit remoto verificado es `b81a88e0a62c4712c5a823b5ebe7419c88b83ba5`.
+- El ultimo commit remoto base verificado antes de esta migracion es `21800ff59f206121c17e61ac9d89c2f20f2f33fa`.
 - Commit `2e81c07`: incorpora la biblia del juego y los documentos de produccion.
 - Commit `a02bc7d`: corrige la altura de origen del proyectil de VANNESA.
 - Commit `a7219a5`: registra las pruebas de combate individuales de ambos protagonistas.
 - Commit `b81a88e`: registra la aceptacion automatizada del Capitulo 1 para ANDRES y VANNESA.
-- Comparacion remota `main` -> `remaster/valle-verde-production`: 4 commits por delante, 0 por detras; `main` permanece en `0a510c8d15b1090e5edf07077f16ea51603a761c`.
+- Comparacion remota `main` -> `remaster/valle-verde-production` antes de migrar: 5 commits por delante, 0 por detras; `main` permanece en `0a510c8d15b1090e5edf07077f16ea51603a761c`.
 - La rama de trabajo no se ha fusionado y estos cambios no se han desplegado en GitHub Pages.
 - El commit `b81a88e` registra la aceptacion automatizada del Capitulo 1 para ANDRES y VANNESA.
 - El push de `b81a88e` fue verificado en GitHub; el estado local posterior al push estuvo limpio.
 
 ## Identidad y alcance del producto
 
-VALLE VERDE es la identidad definida por el Master Production Prompt. La documentacion maestra esta versionada en `docs/`, pero la migracion completa de la identidad visible, interfaz, portada, recursos, personajes y mundos a la vision de Medellin sigue pendiente. No asumir que el juego publicado ya refleja el nuevo producto.
+GUATAPÉ es la identidad oficial vigente. La dirección creativa se define en `docs/GUATAPE-DIRECCION-CREATIVA.md`: fantasía medieval de baja fantasía y steampunk artesanal inspirada en el Pueblo de los Zócalos, el malecón, el embalse, las islas, los caminos de arriería y la Roca del Vigía. La aceptación automatizada anterior del capítulo 1 pertenece al prototipo previo y no valida todavía la nueva ambientación, los recursos gráficos ni los escenarios GUATAPÉ. Los spritesheets, tileset, portada, iconos PWA y recurso Open Graph actuales son provisionales: no desplegar hasta sustituirlos por recursos propios de GUATAPÉ.
 
 El objetivo funcional incluye 5 mundos, 15 capitulos y 5 guardianes. La existencia de datos/configuracion para esas cantidades no demuestra que cada capitulo este terminado ni que todos los jefes puedan derrotarse.
 
@@ -74,6 +74,30 @@ El primer comprobador V1 no mantenia la entrada de ataque el tiempo suficiente p
 - Las pruebas V2 de recorrido completo reportaron cero errores de consola, errores de pagina y solicitudes fallidas.
 - El aterrizaje inicial de ambos personajes se verifico con el cuerpo apoyado sobre la superficie de la primera plataforma, Y=370.
 
+## Regression mecanica del Capitulo 1 tras migracion GUATAPE - 27 de noviembre de 2026
+
+La identidad y narrativa se migraron en el arbol local de trabajo. Se repitio la prueba automatizada de recorrido completo con Edge, Phaser y WebGL usando `VALLE_VERDE_CAPITULO1_COMPLETO_V2.cjs`. El nombre anterior del archivo pertenece al arnes de pruebas reutilizado; no representa la identidad del producto. Esta ejecucion valida la regresion mecanica bajo los textos y datos nuevos, no la calidad visual ni la ambientacion definitiva de GUATAPE.
+
+| Criterio | ANDRES - Principe Caballero | VANNESA - Princesa |
+|---|---:|---:|
+| Estado general | PASS | PASS |
+| WebGL y recursos cargados | PASS | PASS |
+| Primer aterrizaje | PASS | PASS |
+| Enemigos derrotados durante el recorrido | 4 de 4 slimes | 4 de 4 slimes |
+| Checkpoint X=1200 | PASS | PASS |
+| Checkpoint X=2180 | PASS | PASS |
+| Transicion al capitulo 2 | PASS | PASS |
+| Guardado del siguiente nivel | PASS | PASS |
+| Vidas al finalizar | 3 de 3 | 3 de 3 |
+| Errores de consola, pagina o solicitudes | 0 | 0 |
+
+ANDRES termino con puntuacion 700 y VANNESA termino con puntuacion 700. Ambos conservaron tres vidas, activaron los dos checkpoints, derrotaron los cuatro slimes y llegaron a `Intermission` con `nextLevel: 1`. La prueba no utilizo eliminaciones forzadas ni teletransporte para completar el recorrido.
+
+Informe JSON local: `%LOCALAPPDATA%\AuraliaQA\reports\valle-verde-ch1-full-playthrough-v2-2026-11-27T15-42-57-195Z.json`.
+
+Capturas locales: `valle-verde-ch1-v2-andres-2026-11-27T15-42-41-617Z.png` y `valle-verde-ch1-v2-vannesa-2026-11-27T15-42-56-710Z.png` dentro de `%LOCALAPPDATA%\AuraliaQA\reports`.
+
+**Alcance y limitacion:** esto confirma que la migracion narrativa no rompio el recorrido mecanico del primer nivel. No acepta los sprites, tileset, portada, iconos, fondos ni recursos sociales como arte final de GUATAPE. Tampoco reemplaza una pasada manual ni una prueba en telefono fisico.
 ## Pendiente - no afirmar como completado
 
 - Completar y aceptar los 15 capitulos con ambos personajes (30 recorridos de aceptacion).

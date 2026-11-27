@@ -1,22 +1,24 @@
-# THE KINGDOM OF LOVE — ANDRÉS & VANNESA
+# GUATAPÉ — ANDRÉS, Príncipe Caballero & VANNESA, Princesa
 
-## AURALIA: LA CANCIÓN DE DOS LUCES
+## Una aventura de fantasía entre zócalos, montañas y aguas
 
-Aventura de plataformas 2D inspirada en la era de 16 bits, con identidad propia, exploración, combate y una mecánica de resonancia. Andrés y Vannesa son protagonistas seleccionables y cada uno tiene habilidades distintas.
+GUATAPÉ es una aventura 2D de plataformas, combate ligero, exploración, acertijos y resonancia rúnica. Reimagina el pueblo de Guatapé y el paisaje del embalse en un universo medieval de baja fantasía y steampunk artesanal: madera, piedra, cobre, hierro forjado, vapor azul y cristales rúnicos.
 
-## Concepto narrativo
+ANDRÉS es el Príncipe Caballero y utiliza espada y Pulso Dorado. VANNESA es la Princesa y domina la Resonancia Azul, los proyectiles rúnicos y el doble salto. Ambos pueden completar la campaña.
 
-En Auralia, cinco regiones se mantenían en armonía gracias a la Campana del Alba. El Afinador del Silencio quebró su cristal en cinco fragmentos. Andrés y Vannesa recorren rutas distintas para recuperar las notas y devolver la música al reino.
+## Campaña
 
-## Mundos
+Cinco regiones y quince capítulos:
 
-1. Valle de las Campanas.
-2. Bosque de las Luciérnagas.
-3. Mar de Vidrio.
-4. Cumbres del Invierno Azul.
-5. Ciudad del Eclipse.
+1. El Pueblo de los Zócalos.
+2. El Malecón de las Mil Velas.
+3. Las Islas del Embalse.
+4. Los Caminos de Arriería.
+5. La Roca del Vigía.
 
-Cada mundo contiene tres capítulos y un guardián en el tercero.
+Cada región contiene tres capítulos y termina con un guardián. Las misiones secundarias incluyen la Calle del Recuerdo, el Planchón de Bronce, el Torneo de los Zócalos y las rutas de arriería.
+
+La ambientación es una fantasía alternativa. La tecnología de vapor y la magia rúnica son inventadas; no deben confundirse con la historia real de Guatapé. La historia del embalse y sus impactos se trata con respeto.
 
 ## Ejecutar localmente
 
@@ -31,33 +33,23 @@ Se requiere conexión inicial para cargar Phaser 3 desde el CDN. El Service Work
 
 **Móvil:** controles táctiles en pantalla: izquierda, derecha, correr, habilidad, resonancia y salto. Se recomienda jugar en horizontal.
 
-## Mecánica de resonancia
+## Estado de producción
 
-Cada capítulo tiene un resonador antiguo. Acércate y pulsa E o el botón ♫. La onda de resonancia revela un puente temporal, aturde enemigos cercanos y puede dañar a un jefe si está dentro del alcance.
+La aceptación automatizada anterior del capítulo 1 corresponde al prototipo previo. No constituye aprobación de los nuevos escenarios, personajes, portada ni ambientación de GUATAPÉ. El cambio actual conserva provisionalmente la geometría y la lógica probada; requiere una nueva pasada visual, de navegador y de juego manual.
 
-## Personalización
-
-Edita `src/config.js` para cambiar nombres, dedicatoria, carta final, recuerdos secretos, antagonista y créditos. Los recuerdos permanecen vacíos por defecto para no inventar detalles de la relación.
-
-## Publicación
-
-El proyecto está preparado para **GitHub Pages con GitHub Actions**. Sigue `PUBLICAR_EN_GITHUB_PAGES.md`. La automatización está en `.github/workflows/pages.yml`.
+Los spritesheets, tileset, portada, iconos PWA y recurso Open Graph actuales son provisionales y deben sustituirse por arte específico de GUATAPÉ antes de cualquier publicación. La rama de trabajo continúa siendo `remaster/valle-verde-production`; no se ha cambiado `main` ni la URL técnica de GitHub Pages.
 
 ## Estructura
 
-- `index.html`: entrada web y metadatos sociales.
+- `index.html`: entrada web y metadatos.
 - `style.css`: interfaz adaptable y controles táctiles.
-- `src/config.js`: personalización.
-- `src/data.js`: mundos y diseño de quince niveles.
-- `src/art.js`: sprites pixel-art procedurales.
-- `assets/worlds/valle-capitulo-1-tileset.svg`: tileset de 24 cuadros integrado en las plataformas y el suelo del primer capítulo.
+- `src/config.js`: nombre, dedicatoria, carta y créditos.
+- `src/data.js`: cinco regiones y quince capítulos.
+- `src/art.js`: arte procedural temporal.
+- `src/auralia-remaster.js` y `src/auralia-remaster-v2.js`: capa interna de animaciones heredada; el nombre es técnico, no visible en el producto.
 - `src/game.js`: escenas, física, combate, resonancia y progreso.
 - `src/pwa.js` / `sw.js`: instalación opcional y caché.
-- `assets/worlds/`: arte ambiental original.
-- `.github/workflows/pages.yml`: despliegue automático.
+- `docs/GUATAPE-DIRECCION-CREATIVA.md`: dirección creativa vigente.
+- `.github/workflows/pages.yml`: despliegue de GitHub Pages; no desplegar hasta aprobar el nuevo arte y la regresión.
 
-## Estado de calidad
-
-La estructura, los datos y la sintaxis pueden validarse automáticamente con `node tools/validate_project.cjs`. Eso no sustituye una prueba visual completa con Phaser ni pruebas físicas en Android/iPhone. La versión actual representa una evolución jugable y una primera vertical slice de la dirección Auralia; no debe presentarse todavía como lanzamiento comercial final.
-
-La reconstrucción definitiva empezó en la rama `remaster/auralia-definitive`. Consulta `AUDITORIA_PRODUCCION_AURALIA.md` para conocer qué recursos son finales y cuáles siguen provisionales. El capítulo 1 ya tiene un tileset propio y ciclos Phaser de caminar/correr; falta completar las animaciones, los capítulos restantes y la prueba real de recorrido.
+Ejecutar `node tools/validate_project.cjs` para comprobaciones automatizadas. Estas no sustituyen una prueba visual con Phaser, recorridos manuales ni validación en teléfono físico.
