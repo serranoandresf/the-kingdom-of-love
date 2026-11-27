@@ -3,21 +3,23 @@
 **Actualizado:** 27 de noviembre de 2026.
 **Repositorio:** `serranoandresf/the-kingdom-of-love`.
 **Rama de trabajo:** `remaster/valle-verde-production`.
-**Ultimo commit remoto confirmado antes de esta actualizacion:** `a7219a569a7e427551cc4a0b0fd9d23c69efca50`.
+**Ultimo commit remoto verificado:** `b81a88e0a62c4712c5a823b5ebe7419c88b83ba5`.
 **Base de `main`:** `0a510c8d15b1090e5edf07077f16ea51603a761c`.
-**Comparacion remota antes de esta actualizacion:** 3 commits por delante y 0 por detras de `main`.
+**Comparacion remota verificada:** 4 commits por delante y 0 por detras de `main`.
 **URL de GitHub Pages conservada:** `https://serranoandresf.github.io/the-kingdom-of-love/`.
 
 ## Estado de GitHub
 
 - La rama `remaster/valle-verde-production` existe en GitHub.
-- El ultimo commit remoto verificado es `a7219a569a7e427551cc4a0b0fd9d23c69efca50`.
+- El ultimo commit remoto verificado es `b81a88e0a62c4712c5a823b5ebe7419c88b83ba5`.
 - Commit `2e81c07`: incorpora la biblia del juego y los documentos de produccion.
 - Commit `a02bc7d`: corrige la altura de origen del proyectil de VANNESA.
 - Commit `a7219a5`: registra las pruebas de combate individuales de ambos protagonistas.
-- `main` permanece en `0a510c8d15b1090e5edf07077f16ea51603a761c` en la ultima comparacion remota.
+- Commit `b81a88e`: registra la aceptacion automatizada del Capitulo 1 para ANDRES y VANNESA.
+- Comparacion remota `main` -> `remaster/valle-verde-production`: 4 commits por delante, 0 por detras; `main` permanece en `0a510c8d15b1090e5edf07077f16ea51603a761c`.
 - La rama de trabajo no se ha fusionado y estos cambios no se han desplegado en GitHub Pages.
-- La ultima verificacion local despues del push de `a7219a5` mostro un arbol de trabajo limpio.
+- El commit `b81a88e` registra la aceptacion automatizada del Capitulo 1 para ANDRES y VANNESA.
+- El push de `b81a88e` fue verificado en GitHub; el estado local posterior al push estuvo limpio.
 
 ## Identidad y alcance del producto
 
@@ -86,8 +88,8 @@ El primer comprobador V1 no mantenia la entrada de ataque el tiempo suficiente p
 
 ## Siguiente prioridad
 
-1. Registrar y versionar este resultado de aceptacion de Capitulo 1 para ANDRES y VANNESA.
-2. Hacer una pasada manual del capitulo 1 y una regresion de respawn/checkpoints, sin alterar la evidencia automatizada ya conseguida.
-3. Desarrollar el piloto visual/funcional definitivo del Capitulo 1 bajo la direccion de arte VALLE VERDE.
-4. Continuar con el capitulo 2 y ampliar la matriz de 30 recorridos de aceptacion.
+1. Hacer una pasada manual del Capitulo 1 con ambos protagonistas y una regresion de muerte, respawn y recuperacion de checkpoints.
+2. Desarrollar el piloto visual/funcional definitivo del Capitulo 1 bajo la direccion de arte VALLE VERDE, conservando las mecanicas aceptadas.
+3. Continuar con el Capitulo 2 y ampliar la matriz de 30 recorridos de aceptacion.
+4. Repetir validacion de PWA/cache, persistencia y controles tactiles despues de cambios importantes.
 5. Mantener `main` y GitHub Pages intactas hasta la aprobacion final.
